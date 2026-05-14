@@ -21,7 +21,7 @@ builder.Services.AddDbContext<TeachCodItContext>(options =>
 
 builder.Services.AddHttpClient("TeachCodIT-API", client =>
 {
-    client.BaseAddress = new Uri("https://localhost:7045");
+    client.BaseAddress = new Uri("http://teachcodit-api:8080");
     client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 });
 
