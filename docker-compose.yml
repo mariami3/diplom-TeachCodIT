@@ -30,7 +30,7 @@ services:
         condition: service_healthy
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Server=db;Database=TeachCodIt;User Id=sa;Password=YourStrong@Passw0rd123;TrustServerCertificate=True;MultipleActiveResultSets=true
+      - ConnectionStrings__DefaultConnection=Server=tcp:db,1433;Database=TeachCodIT;User Id=sa;Password=YourStrong@Passw0rd123;TrustServerCertificate=True;MultipleActiveResultSets=true
     ports:
       - "5066:8080"
     restart: unless-stopped
@@ -44,7 +44,7 @@ services:
       - api
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Server=db;Database=TeachCodIt;User Id=sa;Password=YourStrong@Passw0rd123;TrustServerCertificate=True;MultipleActiveResultSets=true
+      - ConnectionStrings__DefaultConnection=Server=tcp:db,1433;Database=TeachCodIT;User Id=sa;Password=YourStrong@Passw0rd123;TrustServerCertificate=True;MultipleActiveResultSets=true
     ports:
       - "5000:8080"
     restart: unless-stopped
