@@ -1,0 +1,270 @@
+﻿@model TeachCodIT.Models.Module
+@{
+    ViewData["Title"] = "Редактирование модуля - TeachCodIT";
+}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #48bb78;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+            .logo i {
+                color: #FFD700;
+            }
+
+        .container {
+            max-width: 600px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .page-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .back-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #4a5568;
+            text-decoration: none;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+            .back-btn:hover {
+                background: #48bb78;
+                color: white;
+                transform: translateX(-3px);
+            }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2d3748;
+        }
+
+        .form-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            color: #2d3748;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+            .form-control:focus {
+                outline: none;
+                border-color: #48bb78;
+                box-shadow: 0 0 0 3px rgba(72, 187, 120, 0.1);
+            }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+        }
+
+            .btn-primary:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(72, 187, 120, 0.3);
+            }
+
+        .btn-danger {
+            background: #ff5757;
+            color: white;
+        }
+
+            .btn-danger:hover {
+                background: #ff4242;
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(255, 87, 87, 0.3);
+            }
+
+        .btn-secondary {
+            background: white;
+            color: #4a5568;
+            border: 2px solid #48bb78;
+        }
+
+            .btn-secondary:hover {
+                background: #f0fff4;
+                border-color: #2f855a;
+                color: #2f855a;
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(72, 187, 120, 0.2);
+            }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        .delete-form {
+            margin-top: 1rem;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 1.5rem;
+        }
+
+        .btn-fixed {
+            min-width: 160px;
+            justify-content: center;
+        }
+
+        @@media (max-width: 640px) {
+            .button-group {
+                flex-direction: column;
+                width: 100%;
+            }
+
+                .button-group .btn {
+                    width: 100%;
+                    justify-content: center;
+                }
+
+            .delete-form .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="logo">
+            <i class="fas fa-chalkboard-teacher"></i>
+            TeachCodIT
+        </a>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <a href="@Url.Action("Modules", "Teacher", new { courseId = Model?.CourseId })" class="back-btn">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <h1 class="page-title">Редактирование модуля</h1>
+        </div>
+
+        <!-- Основная форма редактирования -->
+        <div class="form-card">
+            <form asp-action="EditModule" method="post">
+                <input type="hidden" asp-for="IdModule" />
+                <input type="hidden" asp-for="CourseId" />
+
+                <div class="form-group">
+                    <label asp-for="Title" class="form-label">Название модуля</label>
+                    <input asp-for="Title" class="form-control" required />
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="OrderIndex" class="form-label">Порядковый номер</label>
+                    <input asp-for="OrderIndex" type="number" class="form-control" required />
+                </div>
+
+                <!-- Группа кнопок (Сохранить + Уроки модуля) -->
+                <div class="button-group">
+                    <button type="submit" class="btn btn-primary btn-fixed">
+                        <i class="fas fa-save"></i> Сохранить
+                    </button>
+                    <a href="@Url.Action("Lessons", "Teacher", new { moduleId = Model?.IdModule })" class="btn btn-secondary btn-fixed">
+                        <i class="fas fa-video"></i> Уроки модуля
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Отдельная карточка для удаления -->
+        <div class="form-card">
+            <div class="delete-form">
+                <form asp-action="DeleteModule" method="post" onsubmit="return confirm('Вы уверены, что хотите удалить этот модуль? Все уроки и задания также будут удалены.');">
+                    <input type="hidden" name="id" value="@Model?.IdModule" />
+                    <input type="hidden" name="courseId" value="@Model?.CourseId" />
+                    <button type="submit" class="btn btn-danger btn-fixed">
+                        <i class="fas fa-trash"></i> Удалить модуль
+                    </button>
+                </form>
+                <p style="color: #718096; font-size: 0.85rem; margin-top: 0.5rem;">
+                    <i class="fas fa-exclamation-triangle" style="color: #ff5757;"></i>
+                    Внимание: при удалении модуля также будут удалены все связанные уроки и задания
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

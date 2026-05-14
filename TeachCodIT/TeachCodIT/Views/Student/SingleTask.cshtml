@@ -1,0 +1,671 @@
+﻿@model TeachCodIT.Models.ViewModels.LessonTaskViewModel
+
+@{
+    ViewData["Title"] = $"{Model?.Title} - Задание - TeachCodIT";
+    int lessonId = ViewBag.LessonId;
+    int taskId = Model?.IdLessonTask ?? 0;
+}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+
+        /* Navigation */
+        .navbar {
+            background: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #667eea;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+            .logo i {
+                color: #FFD700;
+            }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+            .nav-links a {
+                color: #4a5568;
+                text-decoration: none;
+                font-weight: 500;
+                transition: color 0.3s ease;
+            }
+
+                .nav-links a:hover {
+                    color: #667eea;
+                }
+
+        /* Main Container */
+        .container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        /* Back Link */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #667eea;
+            text-decoration: none;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+            .back-link:hover {
+                color: #5a67d8;
+                transform: translateX(-3px);
+            }
+
+        /* Page Title */
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Task Card */
+        .task-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .task-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2d3748;
+        }
+
+        .task-type {
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .type-test {
+            background: rgba(72, 187, 120, 0.1);
+            color: #48bb78;
+        }
+
+        .type-code {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+        }
+
+        /* Task Description */
+        .task-description {
+            color: #2d3748;
+            font-size: 1.05rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+        }
+
+        /* XP Display */
+        .task-xp {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 215, 0, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            color: #FFD700;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+
+            .task-xp i {
+                font-size: 1rem;
+            }
+
+        /* Options List */
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .option-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+            .option-item:hover {
+                background: #edf2f7;
+                transform: translateX(5px);
+            }
+
+            .option-item.selected {
+                background: rgba(102, 126, 234, 0.1);
+                border-color: #667eea;
+            }
+
+        .option-radio {
+            width: 20px;
+            height: 20px;
+            accent-color: #667eea;
+            cursor: pointer;
+        }
+
+        .option-text {
+            color: #2d3748;
+            font-size: 1rem;
+            flex: 1;
+            cursor: pointer;
+        }
+
+        /* Submit Button */
+        .submit-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+            .submit-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+            }
+
+            .submit-btn:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+                transform: none;
+            }
+
+        /* Result Message */
+        .result-message {
+            margin: 1.5rem 0;
+            padding: 1rem;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.95rem;
+        }
+
+        .result-success {
+            background: rgba(72, 187, 120, 0.1);
+            border-left: 4px solid #48bb78;
+            color: #2d3748;
+        }
+
+            .result-success i {
+                color: #48bb78;
+                font-size: 1.2rem;
+            }
+
+        .result-error {
+            background: rgba(255, 87, 87, 0.1);
+            border-left: 4px solid #ff5757;
+            color: #2d3748;
+        }
+
+            .result-error i {
+                color: #ff5757;
+                font-size: 1.2rem;
+            }
+
+        .result-warning {
+            background: rgba(237, 137, 54, 0.1);
+            border-left: 4px solid #ed8936;
+            color: #2d3748;
+        }
+
+            .result-warning i {
+                color: #ed8936;
+                font-size: 1.2rem;
+            }
+
+        .result-message small {
+            display: block;
+            margin-top: 0.25rem;
+            color: #718096;
+        }
+
+        /* Attempts Info */
+        .attempts-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem 1rem;
+            background: #f8fafc;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            color: #4a5568;
+        }
+
+            .attempts-info i {
+                color: #667eea;
+            }
+
+        /* Code Editor (для заданий с кодом) */
+        .code-editor {
+            background: #1e1e1e;
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 1.5rem 0;
+        }
+
+        .code-header {
+            background: #2d2d2d;
+            padding: 0.75rem 1rem;
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .code-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ff5f56;
+        }
+
+            .code-dot:nth-child(2) {
+                background: #ffbd2e;
+            }
+
+            .code-dot:nth-child(3) {
+                background: #27c93f;
+            }
+
+        .code-title {
+            color: #fff;
+            margin-left: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        .code-textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 1rem;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            border: none;
+            resize: vertical;
+            outline: none;
+        }
+
+            .code-textarea:focus {
+                outline: none;
+            }
+
+        .example-code {
+            background: #f8fafc;
+            padding: 1rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+        }
+
+            .example-code pre {
+                background: #1e1e1e;
+                color: #d4d4d4;
+                padding: 1rem;
+                border-radius: 8px;
+                overflow-x: auto;
+                font-size: 0.85rem;
+            }
+
+        /* All Tasks Link */
+        .all-tasks-link {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e2e8f0;
+            text-align: center;
+        }
+
+            .all-tasks-link a {
+                color: #667eea;
+                text-decoration: none;
+                font-weight: 500;
+                display: inline-flex;
+                align-items: center;
+                gap: 0.5rem;
+                transition: all 0.3s ease;
+            }
+
+                .all-tasks-link a:hover {
+                    color: #5a67d8;
+                    gap: 0.75rem;
+                }
+
+        /* Responsive */
+        @@media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+                margin: 1rem auto;
+            }
+
+            .task-card {
+                padding: 1.5rem;
+            }
+
+            .task-title {
+                font-size: 1.25rem;
+            }
+
+            .page-title {
+                font-size: 1.5rem;
+            }
+
+            .option-item {
+                padding: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <a href="/" class="logo">
+            <i class="fas fa-code"></i> TeachCodIT
+        </a>
+        <div class="nav-links">
+            <a href="@Url.Action("Home", "Student")">Главная</a>
+            <a href="@Url.Action("MyCourses", "Student")">Мои курсы</a>
+            <a href="@Url.Action("Achievements", "Student")">Достижения</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <a href="@Url.Action("Lesson", "Student", new { id = lessonId })" class="back-link">
+            ← Вернуться к уроку
+        </a>
+
+        <h1 class="page-title">Задание</h1>
+
+        <div class="task-card">
+            <div class="task-header">
+                @Html.AntiForgeryToken()
+                <h2>@Model.Title</h2>
+                <span class="task-type @(Model.TaskType == "test" ? "type-test" : "type-code")">
+                    @(Model.TaskType == "test" ? "📝 Тест" : "💻 Код")
+                </span>
+            </div>
+
+            <div class="task-description">@Model.Description</div>
+
+            <div class="task-xp">
+                <i class="fas fa-star"></i> @Model.XPReward XP
+            </div>
+
+            @if (Model.AttemptsCount >= 1 && !ViewBag.IsRetry)
+            {
+                <div class="result-message result-warning">
+                    <i class="fas fa-lock"></i> Вы уже отвечали на это задание
+                    @if (Model.LastAttemptSummary != null)
+                    {
+                        <br />
+                        <small>
+                            Последняя попытка: @Model.LastAttemptSummary.AttemptDate?.ToString("dd.MM в HH:mm") —
+                            <strong style="color: @(Model.LastAttemptSummary.IsCorrect == true ? "#48bb78" : "#ff5757")">
+                                @(Model.LastAttemptSummary.IsCorrect == true ? "Верно" : "Неверно")
+                            </strong>
+                        </small>
+                    }
+                </div>
+            }
+
+            @if (Model.TaskType == "test" && Model.Options?.Any() == true)
+            {
+                <form id="taskForm" asp-action="SubmitTask" method="post">
+
+                    <input type="hidden" name="taskId" value="@Model.IdLessonTask" />
+                    <input type="hidden" name="isRetry" value="@ViewBag.IsRetry" />
+
+                    <div class="options-list">
+                        @foreach (var option in Model.Options)
+                        {
+                            <label class="option-item">
+                                <input type="radio"
+                                       name="optionId"
+                                       value="@option.IdOption"
+                                       required
+                                @(option.IsCorrect ? "data-correct='true'" : "") />
+                                <span class="option-text">@option.OptionText</span>
+                            </label>
+                        }
+                    </div>
+
+                    @if (Model.AttemptsCount > 0 && !ViewBag.IsRetry)
+                    {
+                        <div class="result-message result-warning">
+                            <i class="fas fa-lock"></i> Вы уже отвечали на это задание
+                            @if (Model.LastAttemptSummary != null)
+                            {
+                                <br />
+                                <small>
+                                    Последняя попытка: @Model.LastAttemptSummary.AttemptDate?.ToString("dd.MM в HH:mm") —
+                                    <strong style="color: @(Model.LastAttemptSummary.IsCorrect == true ? "#48bb78" : "#ff5757")">
+                                        @(Model.LastAttemptSummary.IsCorrect == true ? "Верно" : "Неверно")
+                                    </strong>
+                                </small>
+                            }
+                        </div>
+
+                        <button class="submit-btn" disabled>
+                            <i class="fas fa-lock"></i> Уже отвечено
+                        </button>
+                    }
+                    else
+                    {
+                        @if (ViewBag.IsRetry == true)
+                        {
+                            <div class="result-message result-warning" style="margin-bottom: 1rem;">
+                                <i class="fas fa-redo"></i> Это повторная попытка — XP не начисляется
+                            </div>
+                        }
+
+                        <button id="submitBtn" type="submit" class="submit-btn">
+                            <i class="fas fa-paper-plane"></i> Отправить ответ
+                        </button>
+                    }
+                </form>
+               
+            }
+
+            @if (Model.TaskType == "code")
+            {
+                <div class="code-editor">
+                    <div class="code-header">
+                        <div class="code-dot"></div>
+                        <div class="code-dot"></div>
+                        <div class="code-dot"></div>
+                        <span class="code-title">code.cs</span>
+                    </div>
+
+                    <textarea id="codeInput" class="code-textarea" placeholder="// Напиши код здесь..."></textarea>
+                </div>
+
+                <div style="display:flex; gap:10px;">
+                    <button class="submit-btn" onclick="runCode()">
+                        ▶ Запустить
+                    </button>
+
+                    <button class="submit-btn" onclick="submitCode()">
+                        🚀 Отправить
+                    </button>
+                </div>
+
+                <div id="output" class="result-message" style="display:none;"></div>
+            }
+
+            <!-- Навигация по заданиям урока (можно добавить) -->
+            <div style="margin-top: 2rem; text-align: center;">
+                <a href="@Url.Action("Tasks", "Student", new { lessonId })">
+                    <i class="fas fa-list"></i> Все задания урока
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // AntiForgeryToken
+        const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+        // Подсветка вариантов (тесты)
+        document.querySelectorAll('.option-item').forEach(item => {
+            const radio = item.querySelector('input[type="radio"]');
+            if (radio) {
+                radio.addEventListener('change', () => {
+                    document.querySelectorAll('.option-item').forEach(i => i.classList.remove('selected'));
+                    if (radio.checked) item.classList.add('selected');
+                });
+            }
+        });
+
+        const codeInput = document.getElementById('codeInput');
+        const outputDiv = document.getElementById('output');
+        const taskId = @taskId;
+
+        if (codeInput) {
+            const savedCode = localStorage.getItem(`code_${taskId}`);
+            if (savedCode) codeInput.value = savedCode;
+
+            codeInput.addEventListener('input', () => {
+                localStorage.setItem(`code_${taskId}`, codeInput.value);
+            });
+        }
+
+        function runCode() {
+            const code = codeInput.value.trim();
+            if (!code) return showOutput("❌ Введите код", "result-warning");
+
+            fetch('/Student/PreviewCode', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': token
+                },
+                body: JSON.stringify({ taskId: taskId, code: code })
+            })
+                .then(r => r.json())
+                .then(data => showOutput("💻 " + data.output, "result-success"))
+                .catch(() => showOutput("❌ Ошибка соединения", "result-error"));
+        }
+
+        function submitCode() {
+            const code = codeInput.value.trim();
+            if (!code) return showOutput("❌ Введите код перед отправкой", "result-warning");
+
+            const btn = document.querySelector('button[onclick="submitCode()"]');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '⏳ Отправка...';
+
+            fetch('/Student/SubmitCode', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': token
+                },
+                body: JSON.stringify({ taskId: taskId, code: code })
+            })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success !== false) {
+                        if (data.isCorrect) {
+                            showOutput(`✅ ${data.message}<br><strong>Output:</strong> ${data.output || '—'}`, "result-success");
+                        } else {
+                            showOutput(`❌ ${data.message}<br><strong>Output:</strong> ${data.output || '—'}`, "result-error");
+                        }
+                    } else {
+                        showOutput(`⚠️ ${data.message || 'Ошибка'}`, "result-warning");
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    showOutput("❌ Ошибка отправки на сервер", "result-error");
+                })
+                .finally(() => {
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                });
+        }
+
+        function showOutput(html, className) {
+            outputDiv.style.display = "block";
+            outputDiv.className = `result-message ${className}`;
+            outputDiv.innerHTML = html;
+        }
+    </script>
+</body>
+</html>

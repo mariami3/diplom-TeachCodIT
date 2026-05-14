@@ -1,0 +1,927 @@
+﻿@model TeachCodIT.Models.ViewModels.AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Панель администратора - TeachCodIT";
+}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+            min-height: 100vh;
+        }
+
+        /* Navigation */
+        .navbar {
+            background: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #2d3748;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+            .logo i {
+                color: #48bb78;
+            }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+            .nav-links a {
+                color: #4a5568;
+                text-decoration: none;
+                font-weight: 500;
+                transition: color 0.3s ease;
+                display: flex;
+                align-items: center;
+                gap: 0.3rem;
+            }
+
+                .nav-links a:hover,
+                .nav-links a.active {
+                    color: #48bb78;
+                }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .nav-notification {
+            position: relative;
+            cursor: pointer;
+        }
+
+            .nav-notification i {
+                font-size: 1.3rem;
+                color: #4a5568;
+            }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ff5757;
+            color: white;
+            font-size: 0.7rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 10px;
+        }
+
+        /* Профиль с улучшенным выпадающим меню - не исчезает быстро */
+        .nav-profile {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            cursor: pointer;
+            padding: 0.3rem 0.8rem;
+            border-radius: 10px;
+            transition: background 0.3s ease;
+            position: relative;
+        }
+
+            .nav-profile:hover {
+                background: #f7fafc;
+            }
+
+        .profile-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .profile-info {
+            display: none;
+        }
+
+        @@media (min-width: 768px) {
+            .profile-info {
+                display: block;
+            }
+        }
+
+        .profile-name {
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 0.95rem;
+        }
+
+        .profile-role {
+            font-size: 0.8rem;
+            color: #718096;
+        }
+
+        /* Улучшенный выпадающий список с плавными анимациями */
+        .profile-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+            padding: 0.5rem 0;
+            min-width: 220px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
+            margin-top: 0;
+            z-index: 1000;
+            border: 1px solid #e2e8f0;
+        }
+
+        /* При наведении на профиль показываем меню */
+        .nav-profile:hover .profile-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        /* Создаем "мостик" между профилем и меню, чтобы меню не исчезало при уходе мыши */
+        .profile-dropdown::before {
+            content: '';
+            position: absolute;
+            top: -12px;
+            right: 20px;
+            width: 30px;
+            height: 12px;
+            background: transparent;
+        }
+
+        /* Стили для пунктов меню */
+        .dropdown-item {
+            padding: 0.7rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: #4a5568;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            font-size: 0.95rem;
+        }
+
+            .dropdown-item:hover {
+                background: #f7fafc;
+                color: #48bb78;
+                padding-left: 1.25rem;
+            }
+
+            .dropdown-item i {
+                width: 24px;
+                color: #718096;
+                font-size: 1.1rem;
+                transition: color 0.2s ease;
+            }
+
+            .dropdown-item:hover i {
+                color: #48bb78;
+            }
+
+        .dropdown-divider {
+            height: 1px;
+            background: #e2e8f0;
+            margin: 0.5rem 0;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        /* Welcome Section */
+        .welcome-section {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            border-radius: 20px;
+            padding: 2rem;
+            color: white;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+
+        .welcome-text h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome-text p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .quick-stats {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            text-align: center;
+            min-width: 80px;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #FFD700;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+            .stat-card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(72, 187, 120, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+            .stat-icon.users {
+                background: rgba(59, 130, 246, 0.1);
+                color: #3b82f6;
+            }
+
+            .stat-icon.students {
+                background: rgba(72, 187, 120, 0.1);
+                color: #48bb78;
+            }
+
+            .stat-icon.time {
+                background: rgba(237, 137, 54, 0.1);
+                color: #ed8936;
+            }
+
+            .stat-icon.xp {
+                background: rgba(255, 215, 0, 0.1);
+                color: #FFD700;
+            }
+
+        .stat-content {
+            flex: 1;
+        }
+
+        .stat-number {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #2d3748;
+        }
+
+        .stat-text {
+            color: #718096;
+            font-size: 0.9rem;
+        }
+
+        /* Charts Grid */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .chart-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 1rem;
+        }
+
+        .chart-container {
+            height: 300px;
+            position: relative;
+        }
+
+        /* Tables */
+        .data-table {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 2rem;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .table-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .view-all {
+            color: #48bb78;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+            .view-all:hover {
+                text-decoration: underline;
+            }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 1rem;
+            background: #f8fafc;
+            color: #2d3748;
+            font-weight: 600;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        tr:hover td {
+            background: #f8fafc;
+        }
+
+        .rank-badge {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        .rank-1 {
+            background: #FFD700;
+            color: #1a1a2e;
+        }
+
+        .rank-2 {
+            background: #C0C0C0;
+            color: #1a1a2e;
+        }
+
+        .rank-3 {
+            background: #CD7F32;
+            color: white;
+        }
+
+        .progress-bar {
+            width: 100px;
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #48bb78;
+            border-radius: 3px;
+        }
+
+        .export-btn {
+            padding: 0.5rem 1rem;
+            background: #48bb78;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+            .export-btn:hover {
+                background: #38a169;
+                transform: translateY(-2px);
+            }
+
+        /* Footer */
+        .footer {
+            margin-top: 3rem;
+            padding: 2rem 0;
+            border-top: 1px solid #e2e8f0;
+            text-align: center;
+            color: #718096;
+            font-size: 0.85rem;
+        }
+
+        /* Responsive */
+        @@media (max-width: 1024px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @@media (max-width: 768px) {
+            .navbar {
+                padding: 1rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .container {
+                padding: 0 1rem;
+            }
+
+            .welcome-section {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .profile-dropdown {
+                position: fixed;
+                top: auto;
+                right: 1rem;
+                left: auto;
+                min-width: 200px;
+            }
+
+                .profile-dropdown::before {
+                    right: 15px;
+                }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="/" class="logo">
+                <i class="fas fa-chart-line"></i>
+                TeachCodIT Admin
+            </a>
+            <div class="nav-links">
+                <a href="@Url.Action("Index", "Admin")" class="active">
+                    <i class="fas fa-chart-line"></i> Аналитика
+                </a>
+                <a href="@Url.Action("Users", "Admin")">
+                    <i class="fas fa-users"></i> Пользователи
+                </a>
+                <a href="@Url.Action("Roles", "Admin")">
+                    <i class="fas fa-tag"></i> Роли
+                </a>
+                <a href="@Url.Action("Courses", "Admin")">
+                    <i class="fas fa-book"></i> Курсы
+                </a>
+            </div>
+        </div>
+
+        <div class="nav-right">
+            <div class="nav-profile">
+                <div class="profile-avatar">
+                    А
+                </div>
+                <div class="profile-info">
+                    <div class="profile-name">Администратор</div>
+                    <div class="profile-role">Админ</div>
+                </div>
+                <i class="fas fa-chevron-down" style="color: #718096; font-size: 0.8rem;"></i>
+
+                <!-- Улучшенное выпадающее меню -->
+                <div class="profile-dropdown">
+                    <a href="@Url.Action("Profile", "Admin")" class="dropdown-item">
+                        <i class="fas fa-user"></i> Профиль
+                    </a>
+                    <a href="@Url.Action("Settings", "Admin")" class="dropdown-item">
+                        <i class="fas fa-cog"></i> Настройки
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <form asp-action="Logout" asp-controller="Account" method="post" style="margin: 0; padding: 0;">
+                        <button type="submit" class="dropdown-item" style="background: none; border: none; width: 100%; text-align: left; cursor: pointer;">
+                            <i class="fas fa-sign-out-alt"></i> Выйти
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Welcome Section -->
+        <div class="welcome-section">
+            <div class="welcome-text">
+                <h1>Здравствуйте, Администратор! 👋</h1>
+                <p>Управляйте платформой, отслеживайте метрики и модерируйте контент</p>
+            </div>
+            <div class="quick-stats">
+                <div class="stat-item">
+                    <div class="stat-value">@Model.TotalUsers</div>
+                    <div class="stat-label">Пользователей</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">@Model.PopularCourses?.Count</div>
+                    <div class="stat-label">Курсов</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">@Model.TopStudents?.Count</div>
+                    <div class="stat-label">Активных</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon users">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number">@Model.TotalUsers</div>
+                    <div class="stat-text">Всего пользователей</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon students">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number">@(Model.TopStudents?.Count ?? 0)</div>
+                    <div class="stat-text">Активных студентов</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon time">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number">@Model.AverageLearningTime</div>
+                    <div class="stat-text">Среднее время обучения</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon xp">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number">@(Model.TopStudents?.Any() == true ? Model.TopStudents.First().XP : 0)</div>
+                    <div class="stat-text">Максимум XP</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h3 class="chart-title">Регистрации пользователей</h3>
+                <div class="chart-container">
+                    <canvas id="registrationChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <h3 class="chart-title">Завершение курсов</h3>
+                <div class="chart-container">
+                    <canvas id="completionChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Students -->
+        <div class="data-table">
+            <div class="table-header">
+                <h3 class="table-title">🏆 Топ студентов</h3>
+                <a href="@Url.Action("Users", "Admin")" class="view-all">Все пользователи →</a>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Место</th>
+                        <th>Студент</th>
+                        <th>XP</th>
+                        <th>Уровень</th>
+                        <th>Серия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.TopStudents != null && Model.TopStudents.Any())
+                    {
+                        var rank = 1;
+                        foreach (var student in Model.TopStudents.Take(5))
+                        {
+                            <tr>
+                                <td>
+                                    <span class="rank-badge @(rank == 1 ? "rank-1" : rank == 2 ? "rank-2" : rank == 3 ? "rank-3" : "")">
+                                        @if (rank == 1)
+                                        {
+                                            <i class="fas fa-crown"></i>
+                                        }
+                                        else
+                                        {
+                                            @rank
+                                        }
+                                    </span>
+                                </td>
+                                <td>@student.Login</td>
+                                <td><i class="fas fa-star" style="color: #FFD700;"></i> @student.XP</td>
+                                <td>@student.Level</td>
+                                <td><i class="fas fa-fire" style="color: #ff5757;"></i> @student.StreakDays</td>
+                            </tr>
+                            rank++;
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" style="text-align: center; color: #718096; padding: 2rem;">
+                                <i class="fas fa-inbox" style="font-size: 2.5rem; opacity: 0.3; margin-bottom: 0.5rem; display: block;"></i>
+                                Пока нет студентов с прогрессом<br>
+                                <small>Данные появятся после того, как студенты начнут проходить курсы</small>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Popular Courses -->
+        <div class="data-table">
+            <div class="table-header">
+                <h3 class="table-title">📚 Популярные курсы</h3>
+                <a href="@Url.Action("Courses", "Admin")" class="view-all">Все курсы →</a>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Курс</th>
+                        <th>Студентов</th>
+                        <th>Средний прогресс</th>
+                        <th>Популярность</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.PopularCourses != null && Model.PopularCourses.Any())
+                    {
+                        foreach (var course in Model.PopularCourses)
+                        {
+                            <tr>
+                                <td>@course.Title</td>
+                                <td>@course.Enrollments</td>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                        <div class="progress-bar">
+                                            <div class="progress-fill" style="width: @course.AverageProgress%"></div>
+                                        </div>
+                                        <span>@course.AverageProgress%</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    @{
+                                        var popularity = course.Enrollments > 20 ? "🔥 Очень популярен" :
+                                        course.Enrollments > 10 ? "📈 Популярен" :
+                                        course.Enrollments > 0 ? "👍 Есть студенты" : "🆕 Новый";
+                                    }
+                                    @popularity
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="4" style="text-align: center; color: #718096;">Нет данных</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Export Buttons -->
+        <div style="margin-bottom: 1rem;">
+            <button class="export-btn" onclick="window.location='@Url.Action("ExportPopularCourses", "Admin")'">
+                <i class="fas fa-file-excel"></i> Экспорт в Excel
+            </button>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>© 2026 - TeachCodIT - Все права защищены</p>
+        </footer>
+    </div>
+
+    <script>
+        // Регистрации пользователей - градиентный график
+        const regCtx = document.getElementById('registrationChart').getContext('2d');
+        new Chart(regCtx, {
+            type: 'line',
+            data: {
+                labels: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'],
+                datasets: [{
+                    label: 'Новые пользователи',
+                    data: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.RegistrationChartData ?? new List<int> { 12, 19, 25, 31, 45, 52, 48 })),
+                    borderColor: '#48bb78',
+                    backgroundColor: 'rgba(72, 187, 120, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: '#48bb78',
+                    pointBorderColor: '#fff',
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            color: '#4a5568',
+                            usePointStyle: true
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: '#e2e8f0'
+                        },
+                        title: {
+                            display: true,
+                            text: 'Количество пользователей',
+                            color: '#718096'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        title: {
+                            display: true,
+                            text: 'Дни недели',
+                            color: '#718096'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Завершение курсов - разноцветные столбцы
+        const compCtx = document.getElementById('completionChart').getContext('2d');
+        new Chart(compCtx, {
+            type: 'bar',
+            data: {
+                labels: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.CourseCompletionLabels ?? new List<string> { "Янв", "Фев", "Мар", "Апр", "Май" })),
+                datasets: [{
+                    label: 'Завершили курс',
+                    data: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.CourseCompletionData ?? new List<int> { 65, 72, 81, 78, 90 })),
+                    backgroundColor: ['#48bb78', '#4299e1', '#ed8936', '#9f7aea', '#f687b3'],
+                    borderRadius: 8,
+                    barPercentage: 0.7,
+                    categoryPercentage: 0.8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            color: '#4a5568',
+                            usePointStyle: true
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: '#e2e8f0'
+                        },
+                        title: {
+                            display: true,
+                            text: 'Количество завершивших',
+                            color: '#718096'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        title: {
+                            display: true,
+                            text: 'Месяцы',
+                            color: '#718096'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Экспорт данных
+        function exportData(type) {
+            alert(`Экспорт данных "${type}" будет доступен в полной версии`);
+        }
+    </script>
+</body>
+</html>

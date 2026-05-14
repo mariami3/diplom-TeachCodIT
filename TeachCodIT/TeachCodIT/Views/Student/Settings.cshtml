@@ -1,0 +1,920 @@
+﻿@model TeachCodIT.Models.ViewModels.SettingsViewModel
+@{
+    ViewData["Title"] = "Настройки - TeachCodIT";
+    var fullName = $"{Model?.Profile?.FirstName} {Model?.Profile?.LastName}";
+    if (string.IsNullOrWhiteSpace(fullName))
+        fullName = Model?.User?.LoginUser ?? "Студент";
+}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        /* Navigation */
+        .navbar {
+            background: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            transition: background 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #667eea;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+            .logo i {
+                color: #FFD700;
+            }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+            .nav-links a {
+                color: #4a5568;
+                text-decoration: none;
+                font-weight: 500;
+                transition: color 0.3s ease;
+                display: flex;
+                align-items: center;
+                gap: 0.3rem;
+            }
+
+                .nav-links a:hover,
+                .nav-links a.active {
+                    color: #667eea;
+                }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .nav-notification {
+            position: relative;
+            cursor: pointer;
+        }
+
+            .nav-notification i {
+                font-size: 1.3rem;
+                color: #4a5568;
+            }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ff5757;
+            color: white;
+            font-size: 0.7rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 10px;
+        }
+
+        .nav-profile {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            cursor: pointer;
+            padding: 0.3rem 0.8rem;
+            border-radius: 10px;
+            transition: background 0.3s ease;
+            position: relative;
+        }
+
+            .nav-profile:hover {
+                background: #f7fafc;
+            }
+
+        .profile-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .profile-info {
+            display: none;
+        }
+
+        @@media (min-width: 768px) {
+            .profile-info {
+                display: block;
+            }
+        }
+
+        .profile-name {
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 0.95rem;
+        }
+
+        .profile-role {
+            font-size: 0.8rem;
+            color: #718096;
+        }
+
+        /* Profile Dropdown */
+        .profile-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            padding: 0.5rem 0;
+            min-width: 200px;
+            display: none;
+            margin-top: 0.5rem;
+        }
+
+        .nav-profile:hover .profile-dropdown {
+            display: block;
+        }
+
+        .dropdown-item {
+            padding: 0.7rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #4a5568;
+            text-decoration: none;
+            transition: background 0.3s ease;
+        }
+
+            .dropdown-item:hover {
+                background: #f7fafc;
+                color: #667eea;
+            }
+
+            .dropdown-item i {
+                width: 20px;
+                color: #718096;
+            }
+
+        .dropdown-divider {
+            height: 1px;
+            background: #e2e8f0;
+            margin: 0.5rem 0;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 0.5rem;
+            flex-wrap: wrap;
+            transition: border-color 0.3s ease;
+        }
+
+        .tab {
+            padding: 0.5rem 1.5rem;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-bottom: none;
+            border-radius: 10px 10px 0 0;
+            color: #4a5568;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+            .tab:hover,
+            .tab.active {
+                background: #667eea;
+                color: white;
+                border-color: #667eea;
+            }
+
+            .tab i {
+                margin-right: 0.5rem;
+            }
+
+        /* Settings Card */
+        .settings-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 2rem;
+            transition: background 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .settings-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+            transition: border-color 0.3s ease;
+        }
+
+        .settings-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #667eea;
+            font-size: 1.5rem;
+        }
+
+        .settings-title h2 {
+            color: #2d3748;
+            font-size: 1.5rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .settings-title p {
+            color: #718096;
+            font-size: 0.9rem;
+        }
+
+        /* Settings Sections */
+        .settings-section {
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 1rem;
+        }
+
+        .settings-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid #e2e8f0;
+            transition: border-color 0.3s ease;
+        }
+
+            .settings-item:last-child {
+                border-bottom: none;
+            }
+
+        .item-info h4 {
+            color: #2d3748;
+            margin-bottom: 0.3rem;
+            font-size: 1rem;
+        }
+
+        .item-info p {
+            color: #718096;
+            font-size: 0.85rem;
+        }
+
+        /* Theme Switch */
+        .theme-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .theme-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+            .theme-btn:hover {
+                background: #f7fafc;
+            }
+
+            .theme-btn.active {
+                background: #667eea;
+                color: white;
+                border-color: #667eea;
+            }
+
+        /* Select */
+        .settings-select {
+            padding: 0.5rem 2rem 0.5rem 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background: white;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%234a5568' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.5rem center;
+            transition: all 0.3s ease;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.6rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+            .btn-primary:hover {
+                background: #5a67d8;
+                transform: translateY(-2px);
+            }
+
+        .btn-danger {
+            background: #ff5757;
+            color: white;
+        }
+
+            .btn-danger:hover {
+                background: #ff4242;
+                transform: translateY(-2px);
+            }
+
+        /* Danger Zone */
+        .danger-zone {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: rgba(255, 87, 87, 0.05);
+            border: 1px solid rgba(255, 87, 87, 0.2);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+            .danger-zone h3 {
+                color: #ff5757;
+                margin-bottom: 1rem;
+            }
+
+        .danger-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            padding: 1rem 0;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+            .modal.active {
+                display: flex;
+            }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 400px;
+            width: 90%;
+            transition: background 0.3s ease;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .modal-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #2d3748;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #718096;
+        }
+
+        .modal-body {
+            margin-bottom: 1.5rem;
+            color: #718096;
+            line-height: 1.6;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        /* Success Message */
+        .success-message {
+            display: none;
+            background: #48bb78;
+            color: white;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+            .success-message.show {
+                display: block;
+            }
+
+        /* Responsive */
+        @@media (max-width: 768px) {
+            .settings-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+
+            .danger-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .theme-buttons {
+                flex-wrap: wrap;
+            }
+        }
+
+        /* ===== DARK THEME ===== */
+        .dark-theme {
+            background: #1a202c;
+            color: #e2e8f0;
+        }
+
+            .dark-theme .navbar {
+                background: #2d3748;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            }
+
+            .dark-theme .nav-links a {
+                color: #cbd5e0;
+            }
+
+                .dark-theme .nav-links a:hover {
+                    color: #9f7aea;
+                }
+
+            .dark-theme .nav-notification i {
+                color: #cbd5e0;
+            }
+
+            .dark-theme .profile-name {
+                color: #e2e8f0;
+            }
+
+            .dark-theme .profile-role {
+                color: #a0aec0;
+            }
+
+            .dark-theme .settings-card {
+                background: #2d3748;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            }
+
+            .dark-theme .settings-title h2 {
+                color: #e2e8f0;
+            }
+
+            .dark-theme .settings-title p {
+                color: #a0aec0;
+            }
+
+            .dark-theme .settings-header {
+                border-bottom-color: #4a5568;
+            }
+
+            .dark-theme .settings-item {
+                border-bottom-color: #4a5568;
+            }
+
+            .dark-theme .item-info h4 {
+                color: #e2e8f0;
+            }
+
+            .dark-theme .item-info p {
+                color: #a0aec0;
+            }
+
+            .dark-theme .settings-select {
+                background: #1a202c;
+                color: #e2e8f0;
+                border-color: #4a5568;
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23cbd5e0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            }
+
+                .dark-theme .settings-select option {
+                    background: #1a202c;
+                    color: #e2e8f0;
+                }
+
+            .dark-theme .tab {
+                background: #2d3748;
+                border-color: #4a5568;
+                color: #cbd5e0;
+            }
+
+                .dark-theme .tab:hover {
+                    background: #4a5568;
+                }
+
+                .dark-theme .tab.active {
+                    background: #667eea;
+                    color: white;
+                    border-color: #667eea;
+                }
+
+            .dark-theme .theme-btn {
+                background: #1a202c;
+                color: #e2e8f0;
+                border-color: #4a5568;
+            }
+
+                .dark-theme .theme-btn:hover {
+                    background: #4a5568;
+                }
+
+                .dark-theme .theme-btn.active {
+                    background: #667eea;
+                    color: white;
+                    border-color: #667eea;
+                }
+
+            .dark-theme .profile-dropdown {
+                background: #2d3748;
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            }
+
+            .dark-theme .dropdown-item {
+                color: #e2e8f0;
+            }
+
+                .dark-theme .dropdown-item i {
+                    color: #a0aec0;
+                }
+
+                .dark-theme .dropdown-item:hover {
+                    background: #4a5568;
+                    color: #9f7aea;
+                }
+
+                    .dark-theme .dropdown-item:hover i {
+                        color: #9f7aea;
+                    }
+
+            .dark-theme .danger-zone {
+                background: rgba(255, 87, 87, 0.1);
+                border-color: rgba(255, 87, 87, 0.3);
+            }
+
+                .dark-theme .danger-zone h3 {
+                    color: #ff8c8c;
+                }
+
+            .dark-theme .danger-item h4 {
+                color: #e2e8f0;
+            }
+
+            .dark-theme .danger-item p {
+                color: #a0aec0;
+            }
+
+            .dark-theme .modal-content {
+                background: #2d3748;
+            }
+
+            .dark-theme .modal-title {
+                color: #e2e8f0;
+            }
+
+            .dark-theme .modal-body {
+                color: #a0aec0;
+            }
+
+            .dark-theme .modal-close {
+                color: #a0aec0;
+            }
+
+            .dark-theme .tabs {
+                border-bottom-color: #4a5568;
+            }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="/" class="logo">
+                <i class="fas fa-code"></i>
+                TeachCodIT
+            </a>
+            <div class="nav-links">
+                <a href="@Url.Action("Home", "Student")">
+                    <i class="fas fa-home"></i> Главная
+                </a>
+                <a href="@Url.Action("MyCourses", "Student")">
+                    <i class="fas fa-graduation-cap"></i> Мои курсы
+                </a>
+                <a href="@Url.Action("Achievements", "Student")">
+                    <i class="fas fa-trophy"></i> Достижения
+                </a>
+            </div>
+        </div>
+
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Tabs -->
+        <div class="tabs">
+            <a href="@Url.Action("Home", "Student")" class="tab">
+                <i class="fas fa-home"></i> Главная
+            </a>
+            <a href="@Url.Action("Profile", "Student")" class="tab">
+                <i class="fas fa-user"></i> Профиль
+            </a>
+            <a href="@Url.Action("Settings", "Student")" class="tab active">
+                <i class="fas fa-cog"></i> Настройки
+            </a>
+            <a href="@Url.Action("Progress", "Student")" class="tab">
+                <i class="fas fa-chart-line"></i> Прогресс
+            </a>
+        </div>
+
+        <!-- Success Message -->
+        <div class="success-message" id="successMessage">
+            <i class="fas fa-check-circle"></i> Настройки сохранены
+        </div>
+
+        <!-- Основные настройки -->
+        <form asp-action="Settings" method="post">
+
+            <input type="hidden" id="themeInput" name="Theme" value="@Model.Theme" />
+
+
+            <button type="submit" class="btn btn-primary" data-i18n="save">
+                Сохранить изменения
+            </button>
+
+        </form>
+
+        <!-- Настройки темы -->
+        <div class="settings-card">
+            <div class="settings-header">
+                <div class="settings-icon">
+                    <i class="fas fa-palette"></i>
+                </div>
+                <div class="settings-title">
+                    <h2>Внешний вид</h2>
+                    <p>Настройте тему оформления</p>
+                </div>
+            </div>
+
+            <div class="settings-item">
+                <div class="item-info">
+                    <h4>Тема оформления</h4>
+                    <p>Выберите светлую или темную тему</p>
+                </div>
+                <div class="theme-buttons">
+                    <button type="button" class="theme-btn active" data-theme="light" onclick="setTheme('light')">
+                        <i class="fas fa-sun"></i> Светлая
+                    </button>
+                    <button type="button" class="theme-btn" data-theme="dark" onclick="setTheme('dark')">
+                        <i class="fas fa-moon"></i> Темная
+                    </button>
+                    <button type="button" class="theme-btn" data-theme="system" onclick="setTheme('system')">
+                        <i class="fas fa-desktop"></i> Системная
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Опасная зона -->
+        <div class="danger-zone">
+            <h3 data-i18n="danger">
+                <i class="fas fa-exclamation-triangle"></i> Опасная зона
+            </h3>
+
+            <div class="danger-item">
+                <div>
+                    <h4 style="color: #2d3748;">Удалить аккаунт</h4>
+                    <p style="color: #718096; font-size: 0.9rem;">Это действие нельзя отменить. Все ваши данные будут удалены.</p>
+                </div>
+                <button type="button" class="btn btn-danger" onclick="openModal('deleteModal')">
+                    <i class="fas fa-trash"></i> Удалить аккаунт
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно удаления аккаунта -->
+    <div class="modal" id="deleteModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Удаление аккаунта</h2>
+                <button class="modal-close" onclick="closeModal('deleteModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Вы уверены, что хотите удалить свой аккаунт? Это действие нельзя отменить.</p>
+                <p>Все ваши данные, включая прогресс, достижения и историю решений, будут безвозвратно удалены.</p>
+                <div style="margin-top: 1rem;">
+                    <label style="display: flex; align-items: center; gap: 0.5rem;">
+                        <input type="checkbox" id="confirmDelete" />
+                        <span style="color: #2d3748;">Я понимаю последствия и хочу удалить аккаунт</span>
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('deleteModal')">Отмена</button>
+                <button type="button" class="btn btn-danger" onclick="deleteAccount()" id="deleteBtn" disabled>Удалить аккаунт</button>
+            </div>
+        </div>
+    </div>
+
+    
+    <script>
+        const translations = {
+            ru: {
+                language: "Язык интерфейса",
+                timezone: "Часовой пояс",
+                save: "Сохранить изменения",
+                danger: "Опасная зона"
+            },
+            en: {
+                language: "Language",
+                timezone: "Time zone",
+                save: "Save changes",
+                danger: "Danger zone"
+            }
+        };
+
+        function applyLanguage(lang) {
+            const t = translations[lang];
+
+            document.querySelectorAll("[data-i18n]").forEach(el => {
+                const key = el.getAttribute("data-i18n");
+                if (t[key]) {
+                    el.innerText = t[key];
+                }
+            });
+        }
+
+        function applyTheme(theme) {
+            if (theme === 'dark') {
+                document.body.classList.add('dark-theme');
+            } else if (theme === 'light') {
+                document.body.classList.remove('dark-theme');
+            } else {
+                const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (isDark) {
+                    document.body.classList.add('dark-theme');
+                } else {
+                    document.body.classList.remove('dark-theme');
+                }
+            }
+        }
+
+
+        function setTheme(theme) {
+            document.querySelectorAll('.theme-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            document.querySelector(`.theme-btn[data-theme="${theme}"]`).classList.add('active');
+
+            document.getElementById('themeInput').value = theme;
+
+            applyTheme(theme);
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const theme = '@Model.Theme';
+
+            document.getElementById('themeInput').value = theme;
+
+            applyTheme(theme);
+
+            const btn = document.querySelector(`.theme-btn[data-theme="${theme}"]`);
+            if (btn) btn.classList.add('active');
+            const lang = '@Model.Language';
+            applyLanguage(lang);
+
+            document.getElementById("language").addEventListener("change", function () {
+                applyLanguage(this.value);
+            });
+        });
+
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function deleteAccount() {
+
+            if (confirm('Это действие необратимо. Вы точно хотите удалить аккаунт?')) {
+
+                fetch('/Student/DeleteAccount', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                    .then(response => {
+                        if (response.redirected) {
+                            window.location.href = response.url;
+                        }
+                    })
+                    .catch(error => {
+                        console.error(error);
+                        alert('Ошибка удаления аккаунта');
+                    });
+            }
+        }
+
+        document.getElementById('confirmDelete')?.addEventListener('change', function (e) {
+            document.getElementById('deleteBtn').disabled = !e.target.checked;
+        });
+
+        window.onclick = function (event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.classList.remove('active');
+            }
+        }
+    </script>
+</body>
+</html>

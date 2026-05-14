@@ -1,0 +1,613 @@
+﻿@model IEnumerable<TeachCodIT.Models.ViewModels.StudentCourseViewModel>
+@{
+    ViewData["Title"] = "Студенты курса - TeachCodIT";
+    int courseId = ViewBag.CourseId ?? 0;
+    string courseTitle = ViewBag.CourseTitle ?? "Не выбран курс";
+}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #48bb78;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo i {
+            color: #FFD700;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .back-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #4a5568;
+            text-decoration: none;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: #48bb78;
+            color: white;
+            transform: translateX(-3px);
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2d3748;
+        }
+
+        .course-badge {
+            background: #48bb78;
+            color: white;
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(72, 187, 120, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #48bb78;
+            font-size: 1.5rem;
+        }
+
+        .stat-content {
+            flex: 1;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #2d3748;
+        }
+
+        .stat-label {
+            color: #718096;
+            font-size: 0.9rem;
+        }
+
+        /* Search and Filter */
+        .search-section {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .search-row {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            position: relative;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #a0aec0;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.8rem 1rem 0.8rem 2.5rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+        }
+
+        .filter-select {
+            padding: 0.8rem 2rem 0.8rem 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            background: white;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%234a5568' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.5rem center;
+        }
+
+        /* Students Table */
+        .students-table {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .table-header {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1.5fr 1.5fr 1fr 1fr;
+            padding: 1rem 1.5rem;
+            background: #f7fafc;
+            font-weight: 600;
+            color: #2d3748;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .student-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1.5fr 1.5fr 1fr 1fr;
+            padding: 1rem 1.5rem;
+            align-items: center;
+            border-bottom: 1px solid #e2e8f0;
+            transition: background 0.3s ease;
+        }
+
+        .student-row:hover {
+            background: #f7fafc;
+        }
+
+        .student-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .student-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .student-name {
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .student-email {
+            font-size: 0.85rem;
+            color: #718096;
+        }
+
+        .progress-cell {
+            min-width: 120px;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 0.3rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #48bb78, #38a169);
+            border-radius: 3px;
+        }
+
+        .progress-value {
+            font-size: 0.85rem;
+            color: #48bb78;
+            font-weight: 600;
+        }
+
+        .badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .badge-success {
+            background: rgba(72, 187, 120, 0.1);
+            color: #48bb78;
+        }
+
+        .badge-warning {
+            background: rgba(237, 137, 54, 0.1);
+            color: #ed8936;
+        }
+
+        .badge-danger {
+            background: rgba(255, 87, 87, 0.1);
+            color: #ff5757;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #718096;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            background: #48bb78;
+            color: white;
+        }
+
+        .action-btn.view:hover {
+            background: #4299e1;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #718096;
+        }
+
+        .assign-course-section {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .assign-form {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .assign-form .form-group {
+            flex: 1;
+        }
+
+        .assign-form label {
+            display: block;
+            color: #2d3748;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .assign-form select,
+        .assign-form input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+        }
+
+        .assign-btn {
+            padding: 0.8rem 2rem;
+            background: #48bb78;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .assign-btn:hover {
+            background: #38a169;
+            transform: translateY(-2px);
+        }
+
+        @@media (max-width: 1024px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .table-header, .student-row {
+                grid-template-columns: 2fr 1fr 1.5fr 1fr;
+            }
+
+            .header-hide, .cell-hide {
+                display: none;
+            }
+        }
+
+        @@media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .table-header, .student-row {
+                grid-template-columns: 1fr 1fr;
+                gap: 0.5rem;
+            }
+
+            .action-btn.delete:hover {
+                background: #ff5757;
+                color: white;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="logo">
+            <i class="fas fa-chalkboard-teacher"></i>
+            TeachCodIT
+        </a>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <div class="header-left">
+                <a href="@Url.Action("Dashboard", "Teacher")" class="back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <h1 class="page-title">Студенты курса</h1>
+                <span class="course-badge">@courseTitle</span>
+            </div>
+        </div>
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger">@TempData["Error"]</div>
+        }
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success">@TempData["Success"]</div>
+        }
+
+
+        <!-- Поиск и фильтр -->
+        <div class="search-section">
+            <div class="search-row">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Поиск по имени или email..." />
+                </div>
+                <select class="filter-select" id="progressFilter">
+                    <option value="all">Все студенты</option>
+                    <option value="completed">Завершили курс</option>
+                    <option value="in-progress">В процессе</option>
+                    <option value="not-started">Не начинали</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Таблица студентов -->
+        <div class="students-table">
+            <div class="table-header">
+                <div>Студент</div>
+                <div>Email</div>
+                <div>Прогресс</div>
+                <div class="header-hide">XP</div>
+                <div class="header-hide">Streak</div>
+                <div>Действия</div>
+            </div>
+
+            @if (Model != null && Model.Any())
+            {
+                @foreach (var student in Model)
+                {
+                    <div class="student-row">
+                        <div class="student-info">
+                            <div class="student-avatar">
+                                @(student.FullName?.Substring(0, 1) ?? "С")
+                            </div>
+                            <div>
+                                <div class="student-name">@student.FullName</div>
+                            </div>
+                        </div>
+                        <div class="student-email">@student.User?.Email</div>
+                        <div class="progress-cell">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: @student.OverallProgressPercent%"></div>
+                            </div>
+                            <div class="progress-value">@student.OverallProgressPercent%</div>
+                        </div>
+                        <div class="header-hide">@student.TotalXP XP</div>
+                        <div class="header-hide">
+                            <span class="badge @(student.StreakDays > 0 ? "badge-success" : "badge-danger")">
+                                <i class="fas fa-fire"></i> @student.StreakDays
+                            </span>
+                        </div>
+                        <div class="action-buttons">
+                            <form asp-action="RemoveStudentFromCourse" method="post" style="display:inline;">
+                                <input type="hidden" name="studentId" value="@student.StudentId" />
+                                <input type="hidden" name="courseId" value="@courseId" />
+
+                                <button type="submit"
+                                        class="action-btn delete"
+                                        onclick="return confirm('Удалить студента из курса?')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="empty-state">
+                    <i class="fas fa-users" style="font-size: 3rem; color: #e2e8f0; margin-bottom: 1rem;"></i>
+                    <h3>Нет студентов на этом курсе</h3>
+                    <p>Назначьте курс студентам, используя форму ниже</p>
+                </div>
+            }
+        </div>
+
+        <!-- Назначение курса -->
+        <div class="assign-course-section">
+            <h3 style="margin-bottom: 1rem; color: #2d3748;">Назначить курс студенту</h3>
+
+            @if (courseId != 0)
+            {
+                <form asp-action="AssignCourse" method="post" class="assign-form" id="assignCourseForm">
+                    <input type="hidden" name="courseId" value="@courseId" />
+
+                    <div class="form-group">
+                        <label for="studentSelect">Студент</label>
+                        <select id="studentSelect" name="studentId" required>
+                            <option value="">-- Выберите студента --</option>
+                            @if (ViewBag.AllStudents != null)
+                            {
+                                foreach (var user in ViewBag.AllStudents)
+                                {
+                                    <option value="@user.IdUser">@user.LoginUser</option>
+                                }
+                            }
+                        </select>
+                    </div>
+
+                    <button type="submit" class="assign-btn">
+                        <i class="fas fa-plus-circle"></i> Назначить курс
+                    </button>
+                </form>
+            }
+            else
+            {
+                <p style="color:red; font-weight: 600;">Сначала выберите курс, чтобы назначить студенту.</p>
+            }
+        </div>
+
+        <script>
+            // Дополнительная проверка перед отправкой формы
+            document.getElementById('assignCourseForm')?.addEventListener('submit', function (e) {
+                const courseId = parseInt(this.querySelector('input[name="courseId"]').value);
+                const studentId = this.querySelector('select[name="studentId"]').value;
+
+                if (!courseId || courseId === 0) {
+                    e.preventDefault();
+                    alert('Ошибка: курс не выбран!');
+                } else if (!studentId) {
+                    e.preventDefault();
+                    alert('Пожалуйста, выберите студента.');
+                }
+            });
+        </script>
+
+    <script>
+        // Поиск по таблице
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchText = e.target.value.toLowerCase();
+            const rows = document.querySelectorAll('.student-row');
+
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchText) ? 'grid' : 'none';
+            });
+        });
+
+        // Фильтр по прогрессу
+        document.getElementById('progressFilter').addEventListener('change', function(e) {
+            const filter = e.target.value;
+            const rows = document.querySelectorAll('.student-row');
+
+            rows.forEach(row => {
+                const progressText = row.querySelector('.progress-value')?.textContent || '0';
+                const progress = parseInt(progressText);
+
+                switch(filter) {
+                    case 'completed':
+                        row.style.display = progress >= 100 ? 'grid' : 'none';
+                        break;
+                    case 'in-progress':
+                        row.style.display = progress > 0 && progress < 100 ? 'grid' : 'none';
+                        break;
+                    case 'not-started':
+                        row.style.display = progress === 0 ? 'grid' : 'none';
+                        break;
+                    default:
+                        row.style.display = 'grid';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

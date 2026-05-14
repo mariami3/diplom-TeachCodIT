@@ -1,0 +1,453 @@
+﻿@model TeachCodIT.Models.ViewModels.TaskReviewViewModel
+@{
+    ViewData["Title"] = "Проверка задания - TeachCodIT";
+}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #48bb78;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo i {
+            color: #FFD700;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .page-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .back-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #4a5568;
+            text-decoration: none;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: #48bb78;
+            color: white;
+            transform: translateX(-3px);
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2d3748;
+        }
+
+        .review-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+        }
+
+        /* Task Info Card */
+        .task-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 1.5rem;
+        }
+
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .task-type {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            background: rgba(72, 187, 120, 0.1);
+            color: #48bb78;
+        }
+
+        .xp-value {
+            color: #FFD700;
+            font-weight: 600;
+        }
+
+        .task-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 1rem;
+        }
+
+        .task-description {
+            background: #f7fafc;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            line-height: 1.6;
+            color: #2d3748;
+        }
+
+        /* Student Answer */
+        .answer-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 1.5rem;
+        }
+
+        .answer-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .student-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+
+        .student-info h3 {
+            color: #2d3748;
+            margin-bottom: 0.2rem;
+        }
+
+        .student-info p {
+            color: #718096;
+            font-size: 0.9rem;
+        }
+
+        .answer-content {
+            background: #1a1a2e;
+            color: #fff;
+            border-radius: 10px;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        .answer-meta {
+            display: flex;
+            justify-content: space-between;
+            color: #718096;
+            font-size: 0.9rem;
+        }
+
+        /* Review Form */
+        .review-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 100px;
+        }
+
+        .review-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            color: #2d3748;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-check {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: #f7fafc;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .radio-option input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #48bb78;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            resize: vertical;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #48bb78;
+            box-shadow: 0 0 0 3px rgba(72, 187, 120, 0.1);
+        }
+
+        .xp-input-group {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .xp-input {
+            width: 120px;
+            padding: 0.8rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .xp-recommended {
+            color: #718096;
+            font-size: 0.9rem;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(72, 187, 120, 0.3);
+        }
+
+        .expected-answer {
+            background: #f7fafc;
+            border-left: 4px solid #48bb78;
+            padding: 1rem;
+            margin-top: 1rem;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .expected-answer h4 {
+            color: #2d3748;
+            margin-bottom: 0.5rem;
+        }
+
+        .expected-answer pre {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="logo">
+            <i class="fas fa-chalkboard-teacher"></i>
+            TeachCodIT
+        </a>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <a href="@Url.Action("Solutions", "Teacher", new { studentId = Model.Attempt?.UserId, lessonId = Model.Task?.LessonId })" class="back-btn">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <h1 class="page-title">Проверка задания</h1>
+        </div>
+
+        <div class="review-grid">
+            <div class="left-column">
+                <!-- Информация о задании -->
+                <div class="task-card">
+                    <div class="task-header">
+                        <span class="task-type">@(Model.Task?.TaskType == "test" ? "Тест" : "Задача с кодом")</span>
+                        <span class="xp-value"><i class="fas fa-star"></i> @Model.Task?.Xpreward XP</span>
+                    </div>
+                    <h2 class="task-title">@Model.Task?.Title</h2>
+                    <div class="task-description">
+                        @Model.Task?.Description
+                    </div>
+
+                    @if (Model.Task?.TaskType == "test" && Model.Task?.TaskOptions != null)
+                    {
+                        <div style="margin-top: 1rem;">
+                            <h4 style="margin-bottom: 0.5rem;">Правильные ответы:</h4>
+                            @foreach (var option in Model.Task.TaskOptions.Where(o => o.IsCorrect == true))
+                            {
+                                <div style="color: #48bb78; margin-bottom: 0.3rem;">
+                                    <i class="fas fa-check-circle"></i> @option.OptionText
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+
+                <!-- Ответ студента -->
+                <div class="answer-card">
+                    <div class="answer-header">
+                        <div class="student-avatar">
+                            @(ViewBag.StudentName?.Substring(0, 1) ?? "С")
+                        </div>
+                        <div class="student-info">
+                            <h3>@ViewBag.StudentName</h3>
+                            <p><i class="far fa-clock"></i> Отправлено: @Model.Attempt?.AttemptDate?.ToString("dd.MM.yyyy HH:mm")</p>
+                        </div>
+                    </div>
+
+                    <h4 style="margin-bottom: 0.5rem;">Ответ студента:</h4>
+                    <div class="answer-content">
+                        @Model.Attempt?.SubmittedAnswer
+                    </div>
+
+                    <div class="answer-meta">
+                        <span><i class="fas fa-code"></i> @(Model.Attempt?.SubmittedAnswer?.Length ?? 0) символов</span>
+                        @if (Model.Attempt?.IsCorrect != null)
+                        {
+                            <span class="@(Model.Attempt.IsCorrect == true ? "text-success" : "text-danger")">
+                                @(Model.Attempt.IsCorrect == true ? "✓ Верно" : "✗ Неверно")
+                            </span>
+                        }
+                    </div>
+                </div>
+
+                <!-- Ожидаемый ответ (для задач с кодом) -->
+                @if (Model.Task?.TaskType == "code")
+                {
+                    <div class="expected-answer">
+                        <h4>Ожидаемый ответ/шаблон:</h4>
+                        <pre><code>// Здесь должен быть пример правильного решения
+    function solution() {
+        // Код решения
+    }</code></pre>
+                    </div>
+                }
+            </div>
+
+            <!-- Форма проверки -->
+            <div class="right-column">
+                <div class="review-card">
+                    <h3 class="review-title">Результат проверки</h3>
+
+                    <form asp-action="ReviewTask" method="post">
+                        <input type="hidden" asp-for="Attempt.IdAttempt" />
+
+                        <div class="form-group">
+                            <label class="form-label">Оценка</label>
+                            <div class="form-check">
+                                <label class="radio-option">
+                                    <input type="radio" asp-for="Attempt.IsCorrect" value="true" />
+                                    <i class="fas fa-check-circle" style="color: #48bb78;"></i>
+                                    Верно
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" asp-for="Attempt.IsCorrect" value="false" />
+                                    <i class="fas fa-times-circle" style="color: #ff5757;"></i>
+                                    Неверно
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Начислено XP</label>
+                            <div class="xp-input-group">
+                                <input type="number" asp-for="Attempt.EarnedXp" class="xp-input" min="0" max="@Model.Task?.Xpreward" />
+                                <span class="xp-recommended">из @Model.Task?.Xpreward</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Комментарий к работе</label>
+                            <textarea asp-for="Attempt.Comment" class="form-control" rows="4"
+                                      placeholder="Оставьте комментарий для студента..."></textarea>
+                        </div>
+
+                        <button type="submit" class="btn-submit">
+                            <i class="fas fa-check-circle"></i> Завершить проверку
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

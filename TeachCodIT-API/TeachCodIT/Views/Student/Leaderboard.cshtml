@@ -1,0 +1,355 @@
+﻿@model List<TeachCodIT.Models.ViewModels.LeaderboardEntry>
+@{
+    ViewData["Title"] = "Таблица лидеров - TeachCodIT";
+}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #667eea;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo i {
+            color: #FFD700;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 0.5rem 1.5rem;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-bottom: none;
+            border-radius: 10px 10px 0 0;
+            color: #4a5568;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .tab:hover,
+        .tab.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .tab i {
+            margin-right: 0.5rem;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2d3748;
+        }
+
+        .leaderboard-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .leaderboard-header {
+            display: grid;
+            grid-template-columns: 80px 1fr 120px 100px;
+            padding: 1rem 1.5rem;
+            background: #f7fafc;
+            font-weight: 600;
+            color: #2d3748;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .leaderboard-item {
+            display: grid;
+            grid-template-columns: 80px 1fr 120px 100px;
+            padding: 1rem 1.5rem;
+            align-items: center;
+            border-bottom: 1px solid #e2e8f0;
+            transition: background 0.3s ease;
+        }
+
+        .leaderboard-item:hover {
+            background: #f7fafc;
+        }
+
+        .leaderboard-item.current-user {
+            background: rgba(102, 126, 234, 0.05);
+            border-left: 4px solid #667eea;
+        }
+
+        .rank {
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .rank-1 {
+            color: #FFD700;
+        }
+
+        .rank-2 {
+            color: #C0C0C0;
+        }
+
+        .rank-3 {
+            color: #CD7F32;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .xp-value {
+            font-weight: 600;
+            color: #FFD700;
+        }
+
+        .streak-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            background: #ff5757;
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 5px;
+            font-size: 0.85rem;
+        }
+
+        .podium {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            align-items: flex-end;
+        }
+
+        .podium-item {
+            text-align: center;
+            padding: 1.5rem;
+            border-radius: 15px;
+        }
+
+        .podium-item.first {
+            background: linear-gradient(135deg, #FFD700, #FDB931);
+            color: #1a1a2e;
+        }
+
+        .podium-item.second {
+            background: linear-gradient(135deg, #C0C0C0, #A0A0A0);
+            color: white;
+        }
+
+        .podium-item.third {
+            background: linear-gradient(135deg, #CD7F32, #B87333);
+            color: white;
+        }
+
+        .podium-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 2rem;
+            font-weight: 700;
+            border: 3px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .podium-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+
+        .podium-xp {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .podium-stats {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            background: white;
+            border-radius: 15px;
+            color: #718096;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="logo">
+            <i class="fas fa-code"></i> TeachCodIT
+        </a>
+    </nav>
+
+    <div class="container">
+        <div class="tabs">
+            <a href="@Url.Action("Home", "Student")" class="tab">
+                <i class="fas fa-home"></i> Главная
+            </a>
+            <a href="@Url.Action("AllCourses", "Student")" class="tab">
+                <i class="fas fa-book"></i> Курсы
+            </a>
+            <a href="@Url.Action("Leaderboard", "Student")" class="tab active">
+                <i class="fas fa-trophy"></i> Лидерборд
+            </a>
+        </div>
+
+        <div class="page-header">
+            <h1 class="page-title">Таблица лидеров</h1>
+        </div>
+
+        @if (Model != null && Model.Any())
+        {
+            <!-- Пьедестал для топ-3 -->
+            if (Model.Count >= 3)
+            {
+                <div class="podium">
+                    <div class="podium-item second">
+                        <div class="podium-avatar">@(Model[1].FullName?.Substring(0, 1) ?? "2")</div>
+                        <div class="podium-name">@Model[1].FullName</div>
+                        <div class="podium-xp"><i class="fas fa-star"></i> @Model[1].XP XP</div>
+                        <div class="podium-stats">🔥 @Model[1].StreakDays дней</div>
+                    </div>
+                    <div class="podium-item first">
+                        <div class="podium-avatar">@(Model[0].FullName?.Substring(0, 1) ?? "1")</div>
+                        <div class="podium-name">@Model[0].FullName</div>
+                        <div class="podium-xp"><i class="fas fa-star"></i> @Model[0].XP XP</div>
+                        <div class="podium-stats">🔥 @Model[0].StreakDays дней</div>
+                    </div>
+                    <div class="podium-item third">
+                        <div class="podium-avatar">@(Model[2].FullName?.Substring(0, 1) ?? "3")</div>
+                        <div class="podium-name">@Model[2].FullName</div>
+                        <div class="podium-xp"><i class="fas fa-star"></i> @Model[2].XP XP</div>
+                        <div class="podium-stats">🔥 @Model[2].StreakDays дней</div>
+                    </div>
+                </div>
+            }
+
+            <!-- Полная таблица -->
+            <div class="leaderboard-card">
+                <div class="leaderboard-header">
+                    <div>Место</div>
+                    <div>Студент</div>
+                    <div>XP</div>
+                    <div>Серия</div>
+                </div>
+
+                @foreach (var entry in Model)
+                {
+                    <div class="leaderboard-item @(entry.IsCurrentUser ? "current-user" : "")">
+                        <div class="rank @(entry.Rank == 1 ? "rank-1" : entry.Rank == 2 ? "rank-2" : entry.Rank == 3 ? "rank-3" : "")">
+                            @if (entry.Rank == 1)
+                            {
+                                <i class="fas fa-crown"></i>
+                            }
+                            else
+                            {
+                                @entry.Rank
+                            }
+                        </div>
+                        <div class="user-info">
+                            <div class="user-avatar">
+                                @(entry.FullName?.Substring(0, 1) ?? entry.UserName?.Substring(0, 1) ?? "?")
+                            </div>
+                            <span class="user-name">@(entry.FullName ?? entry.UserName)</span>
+                        </div>
+                        <div class="xp-value"><i class="fas fa-star"></i> @entry.XP</div>
+                        <div>
+                            <span class="streak-badge">
+                                <i class="fas fa-fire"></i> @entry.StreakDays
+                            </span>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <i class="fas fa-trophy" style="font-size: 3rem; color: #e2e8f0; margin-bottom: 1rem;"></i>
+                <h3>Пока нет данных</h3>
+                <p>Наберите 100 XP, чтобы попасть в таблицу лидеров</p>
+            </div>
+        }
+    </div>
+</body>
+</html>

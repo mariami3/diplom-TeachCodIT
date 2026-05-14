@@ -1,0 +1,17 @@
+.vs/
+bin/
+obj/
+*.user
+*.suo
+*.pdb
+
+.dockerignore
+**/.dockerignore
+
+*.log
+
+*.tmp
+*.temp
+
+*.bak
+*.sql.bak

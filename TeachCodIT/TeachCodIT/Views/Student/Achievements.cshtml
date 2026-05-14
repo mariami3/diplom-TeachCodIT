@@ -1,0 +1,589 @@
+﻿@using TeachCodIT.Models.ViewModels
+@model List<TeachCodIT.Models.ViewModels.UserAchievementViewModel>
+@{
+    ViewData["Title"] = "Мои достижения - TeachCodIT";
+    // Данные для прогресса - в реальном приложении они должны приходить из модели или ViewBag
+    var progress = ViewBag.Progress as TeachCodIT.Models.UserProgress;
+
+    int currentLevel = progress?.Level ?? 1;
+    int currentXP = progress?.Xp ?? 0;
+    int streakDays = progress?.StreakDays ?? 0;
+
+    int currentLevelXP = currentXP % 100;
+    int nextLevelXP = (currentLevel + 1) * 100;
+    int xpToNextLevel = 100 - currentLevelXP;
+    int xpProgressPercent = currentLevelXP;
+}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #667eea;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo i {
+            color: #FFD700;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .nav-links a {
+            color: #4a5568;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: #667eea;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 0.5rem 1.5rem;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-bottom: none;
+            border-radius: 10px 10px 0 0;
+            color: #4a5568;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .tab:hover,
+        .tab.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .tab i {
+            margin-right: 0.5rem;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2d3748;
+        }
+
+        /* Stats Summary - улучшенный дизайн */
+        .stats-summary {
+            display: flex;
+            gap: 2rem;
+            background: white;
+            padding: 1rem 2rem;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #718096;
+            font-size: 0.9rem;
+        }
+
+        /* Прогресс до следующего уровня - новая секция */
+        .progress-section {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .level-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .level-info {
+            display: flex;
+            gap: 1rem;
+            align-items: baseline;
+        }
+
+        .current-level {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2d3748;
+        }
+
+        .next-level {
+            font-size: 1.2rem;
+            color: #718096;
+        }
+
+        .xp-total {
+            font-weight: 600;
+            color: #FFD700;
+        }
+
+        .progress-container {
+            margin-top: 1rem;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: #718096;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-bar {
+            background: #e2e8f0;
+            height: 12px;
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            width: @xpProgressPercent%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            height: 100%;
+            border-radius: 20px;
+            transition: width 0.5s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, 
+                rgba(255, 255, 255, 0.2) 0%, 
+                rgba(255, 255, 255, 0.4) 50%, 
+                rgba(255, 255, 255, 0.2) 100%);
+            animation: shimmer 2s infinite;
+        }
+
+        @@keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .xp-info {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+            font-size: 0.85rem;
+            color: #718096;
+        }
+
+        .xp-needed {
+            color: #ed8936;
+            font-weight: 500;
+        }
+
+        /* Streak mini */
+        .streak-mini {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            background: rgba(255, 87, 87, 0.1);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            color: #ff5757;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .achievements-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .achievement-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .achievement-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .achievement-icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 215, 0, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            color: #FFD700;
+            font-size: 1.8rem;
+        }
+
+        .achievement-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 0.5rem;
+        }
+
+        .achievement-desc {
+            color: #718096;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 1rem;
+            flex: 1;
+        }
+
+        .achievement-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 1rem;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .achievement-xp {
+            color: #FFD700;
+            font-weight: 600;
+        }
+
+        .achievement-date {
+            color: #718096;
+            font-size: 0.85rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            background: white;
+            border-radius: 15px;
+            color: #718096;
+            grid-column: 1 / -1;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            color: #e2e8f0;
+            margin-bottom: 1rem;
+        }
+
+        /* Responsive */
+        @@media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+            }
+            
+            .stats-summary {
+                padding: 0.8rem 1.2rem;
+                gap: 1rem;
+            }
+            
+            .stat-value {
+                font-size: 1.2rem;
+            }
+            
+            .level-info {
+                flex-direction: column;
+                gap: 0.3rem;
+            }
+            .achievement-card.unlocked {
+                border: 2px solid rgba(255, 215, 0, 0.3);
+            }
+            .achievement-card.locked {
+                opacity: 0.6;
+                filter: grayscale(100%);
+            }
+
+            .achievement-card.locked .achievement-icon {
+                background: rgba(0, 0, 0, 0.05);
+                color: #a0aec0;
+            }
+
+            .achievement-card.locked:hover {
+                transform: none;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            }
+            /* ================= ДОСТИЖЕНИЯ ================= */
+            .achievements-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+                gap: 1.6rem;
+                margin-top: 2rem;
+            }
+
+            .achievement-card {
+                background: white;
+                border-radius: 16px;
+                padding: 1.8rem;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+                transition: all 0.3s ease;
+                display: flex;
+                flex-direction: column;
+                height: 100%;
+                border: 1px solid #f1f5f9;
+            }
+
+                .achievement-card:hover {
+                    transform: translateY(-8px);
+                    box-shadow: 0 12px 30px rgba(102, 126, 234, 0.18);
+                    border-color: #c3d0ff;
+                }
+
+            .achievement-icon {
+                width: 78px;
+                height: 78px;
+                background: linear-gradient(135deg, #667eea, #764ba2);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin-bottom: 1.5rem;
+                color: white;
+                font-size: 2.4rem;
+                box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+            }
+
+            .achievement-card.locked .achievement-icon {
+                background: #e2e8f0;
+                color: #94a3b8;
+                box-shadow: none;
+            }
+
+            .achievement-title {
+                font-size: 1.28rem;
+                font-weight: 700;
+                color: #2d3748;
+                margin-bottom: 0.7rem;
+                line-height: 1.35;
+            }
+
+            .achievement-desc {
+                color: #64748b;
+                font-size: 0.96rem;
+                line-height: 1.6;
+                margin-bottom: 1.6rem;
+                flex: 1;
+            }
+
+            .achievement-meta {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding-top: 1.3rem;
+                border-top: 1px solid #f1f5f9;
+                margin-top: auto;
+            }
+
+            .achievement-xp {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.4rem;
+                color: #FFD700;
+                font-weight: 700;
+                font-size: 1.1rem;
+            }
+
+            .achievement-date {
+                color: #94a3b8;
+                font-size: 0.87rem;
+            }
+
+            .achievement-card.unlocked {
+                border-left: 5px solid #48bb78;
+            }
+
+            .achievement-card.locked {
+                opacity: 0.78;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="logo">
+            <i class="fas fa-code"></i> TeachCodIT
+        </a>
+        <div class="nav-links">
+            <a href="@Url.Action("Home", "Student")">Главная</a>
+            <a href="@Url.Action("MyCourses", "Student")">Мои курсы</a>
+            <a href="@Url.Action("Achievements", "Student")" style="color: #667eea;">Достижения</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="tabs">
+            <a href="@Url.Action("Home", "Student")" class="tab">
+                <i class="fas fa-home"></i> Главная
+            </a>
+            <a href="@Url.Action("Achievements", "Student")" class="tab active">
+                <i class="fas fa-trophy"></i> Достижения
+            </a>
+        </div>
+
+        <div class="page-header">
+            <h1 class="page-title">Мои достижения</h1>
+            <div class="stats-summary">
+                <div class="stat-item">
+                    <div class="stat-value">@Model?.Count(a => a.IsUnlocked)</div>
+                    <div class="stat-label">Получено</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">@ViewBag.XP</div>
+                    <div class="stat-label">Всего XP</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">@streakDays</div>
+                    <div class="stat-label">Дней подряд 🔥</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Секция прогресса до следующего уровня -->
+        <div class="progress-section">
+            <div class="level-header">
+                <div class="level-info">
+                    <span class="current-level">Уровень @currentLevel</span>
+                    <span class="next-level">→ Уровень @(currentLevel + 1)</span>
+                </div>
+                <div class="streak-mini">
+                    <i class="fas fa-fire"></i> @streakDays дней
+                </div>
+            </div>
+
+            <div class="progress-container">
+                <div class="progress-label">
+                    <span>Прогресс</span>
+                    <span>@currentLevelXP XP / 100 XP</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: @xpProgressPercent%"></div>
+                </div>
+                <div class="xp-info">
+                    <span>До следующего уровня:</span>
+                    <span class="xp-needed">@xpToNextLevel XP</span>
+                </div>
+            </div>
+        </div>
+        @if (ViewBag.CompletedDailyQuests != null && ((List<UserDailyQuestViewModel>)ViewBag.CompletedDailyQuests).Any())
+        {
+            <div class="progress-section">
+                <h2 style="margin-bottom: 1rem;">✅ Выполненные сегодня задания</h2>
+
+                <div class="quests-grid">
+                    @foreach (var quest in (List<UserDailyQuestViewModel>)ViewBag.CompletedDailyQuests)
+                    {
+                        <div class="quest-card completed">
+                            <div class="quest-header">
+                                <div class="quest-icon"
+                                     style="background: #ecfdf5; color: #10b981;">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                <div>
+                                    <div class="quest-title">@quest.QuestTitle</div>
+                                    <div class="quest-desc">@quest.QuestDescription</div>
+                                </div>
+                            </div>
+
+                            <div class="quest-reward">
+                                <i class="fas fa-star"></i> +@quest.XPReward XP
+                            </div>
+
+                            <div class="status completed">
+                                <i class="fas fa-check-circle"></i> Выполнено
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <i class="fas fa-trophy"></i>
+                <h3>У вас пока нет достижений</h3>
+                <p>Проходите  и решайте задачи, чтобы получать награды!</p>
+            </div>
+        }
+    </div>
+</body>
+</html>

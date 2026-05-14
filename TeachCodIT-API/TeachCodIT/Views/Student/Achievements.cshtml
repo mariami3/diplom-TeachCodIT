@@ -1,0 +1,272 @@
+﻿@model List<TeachCodIT.Models.ViewModels.UserAchievementViewModel>
+@{
+    ViewData["Title"] = "Мои достижения - TeachCodIT";
+}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #667eea;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo i {
+            color: #FFD700;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 0.5rem 1.5rem;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-bottom: none;
+            border-radius: 10px 10px 0 0;
+            color: #4a5568;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .tab:hover,
+        .tab.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .tab i {
+            margin-right: 0.5rem;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2d3748;
+        }
+
+        .stats-summary {
+            display: flex;
+            gap: 2rem;
+            background: white;
+            padding: 1rem 2rem;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #718096;
+            font-size: 0.9rem;
+        }
+
+        .achievements-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .achievement-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .achievement-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .achievement-icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 215, 0, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            color: #FFD700;
+            font-size: 1.8rem;
+        }
+
+        .achievement-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 0.5rem;
+        }
+
+        .achievement-desc {
+            color: #718096;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 1rem;
+            flex: 1;
+        }
+
+        .achievement-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 1rem;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .achievement-xp {
+            color: #FFD700;
+            font-weight: 600;
+        }
+
+        .achievement-date {
+            color: #718096;
+            font-size: 0.85rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            background: white;
+            border-radius: 15px;
+            color: #718096;
+            grid-column: 1 / -1;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            color: #e2e8f0;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="logo">
+            <i class="fas fa-code"></i> TeachCodIT
+        </a>
+    </nav>
+
+    <div class="container">
+        <div class="tabs">
+            <a href="@Url.Action("Home", "Student")" class="tab">
+                <i class="fas fa-home"></i> Главная
+            </a>
+            <a href="@Url.Action("AllCourses", "Student")" class="tab">
+                <i class="fas fa-book"></i> Курсы
+            </a>
+            <a href="@Url.Action("Achievements", "Student")" class="tab active">
+                <i class="fas fa-trophy"></i> Достижения
+            </a>
+        </div>
+
+        <div class="page-header">
+            <h1 class="page-title">Мои достижения</h1>
+            <div class="stats-summary">
+                <div class="stat-item">
+                    <div class="stat-value">@Model?.Count</div>
+                    <div class="stat-label">Получено</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">@(Model?.Sum(a => a.XPReward) ?? 0)</div>
+                    <div class="stat-label">Всего XP</div>
+                </div>
+            </div>
+        </div>
+
+        @if (Model != null && Model.Any())
+        {
+            <div class="achievements-grid">
+                @foreach (var achievement in Model)
+                {
+                    <div class="achievement-card">
+                        <div class="achievement-icon">
+                            <i class="fas @(achievement.Icon ?? "fa-trophy")"></i>
+                        </div>
+                        <h3 class="achievement-title">@achievement.AchievementTitle</h3>
+                        <p class="achievement-desc">@achievement.AchievementDescription</p>
+                        <div class="achievement-meta">
+                            <span class="achievement-xp"><i class="fas fa-star"></i> +@achievement.XPReward XP</span>
+                            <span class="achievement-date">@achievement.EarnedAt.ToString("dd.MM.yyyy")</span>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <i class="fas fa-trophy"></i>
+                <h3>У вас пока нет достижений</h3>
+                <p>Проходите курсы и решайте задачи, чтобы получать награды!</p>
+            </div>
+        }
+    </div>
+</body>
+</html>

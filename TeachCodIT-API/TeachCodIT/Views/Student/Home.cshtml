@@ -1,0 +1,1127 @@
+﻿@model TeachCodIT.Models.ViewModels.StudentDashboardViewModel
+@{
+    ViewData["Title"] = "Панель студента - TeachCodIT";
+    var firstName = Model?.Profile?.FirstName ?? Model?.User?.LoginUser ?? "Студент";
+    var streakDays = Model?.Progress?.StreakDays ?? 0;
+    var totalXp = Model?.Progress?.Xp ?? 0;
+    var currentLevel = Model?.Progress?.Level ?? 1;
+}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+
+        /* Navigation */
+        .navbar {
+            background: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #667eea;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo i {
+            color: #FFD700;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .nav-links a {
+            color: #4a5568;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: #667eea;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .nav-notification {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .nav-notification i {
+            font-size: 1.3rem;
+            color: #4a5568;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ff5757;
+            color: white;
+            font-size: 0.7rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 10px;
+        }
+
+        .nav-profile {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            cursor: pointer;
+            padding: 0.3rem 0.8rem;
+            border-radius: 10px;
+            transition: background 0.3s ease;
+            position: relative;
+        }
+
+        .nav-profile:hover {
+            background: #f7fafc;
+        }
+
+        .profile-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .profile-info {
+            display: none;
+        }
+
+        @@media (min-width: 768px) {
+            .profile-info {
+                display: block;
+            }
+        }
+
+        .profile-name {
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 0.95rem;
+        }
+
+        .profile-role {
+            font-size: 0.8rem;
+            color: #718096;
+        }
+
+        /* Profile Dropdown */
+        .profile-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            padding: 0.5rem 0;
+            min-width: 200px;
+            display: none;
+            margin-top: 0.5rem;
+        }
+
+        .nav-profile:hover .profile-dropdown {
+            display: block;
+        }
+
+        .dropdown-item {
+            padding: 0.7rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #4a5568;
+            text-decoration: none;
+            transition: background 0.3s ease;
+        }
+
+        .dropdown-item:hover {
+            background: #f7fafc;
+            color: #667eea;
+        }
+
+        .dropdown-item i {
+            width: 20px;
+            color: #718096;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: #e2e8f0;
+            margin: 0.5rem 0;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 0.5rem 1.5rem;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-bottom: none;
+            border-radius: 10px 10px 0 0;
+            color: #4a5568;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .tab:hover,
+        .tab.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .tab i {
+            margin-right: 0.5rem;
+        }
+
+        /* Welcome Section */
+        .welcome-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            padding: 2rem;
+            color: white;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+
+        .welcome-text {
+            flex: 2;
+            min-width: 300px;
+        }
+
+        .welcome-text h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome-text p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .quick-stats {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .stat-item {
+            text-align: center;
+            min-width: 80px;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #FFD700;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+        }
+
+        .action-btn {
+            padding: 0.8rem 1.5rem;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            color: #4a5568;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .action-btn i {
+            font-size: 1rem;
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .dashboard-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            height: fit-content;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .card-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #667eea;
+        }
+
+        /* XP Progress */
+        .xp-progress {
+            margin: 1rem 0;
+        }
+
+        .xp-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            color: #718096;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 4px;
+            width: @(((double)totalXp / ((currentLevel + 1) * 100)) * 100)%;
+        }
+
+        .level-info {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+            font-size: 0.85rem;
+            color: #718096;
+        }
+
+        /* Streak */
+        .streak-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #ff5757;
+            text-align: center;
+        }
+
+        .streak-label {
+            text-align: center;
+            color: #718096;
+            font-size: 0.9rem;
+        }
+
+        /* Courses List */
+        .courses-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .course-item {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem;
+            background: #f7fafc;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .course-item:hover {
+            background: #edf2f7;
+        }
+
+        .course-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            margin-right: 1rem;
+        }
+
+        .course-info {
+            flex: 1;
+        }
+
+        .course-name {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 0.3rem;
+        }
+
+        .course-progress {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .course-progress-bar {
+            flex: 1;
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .course-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 3px;
+        }
+
+        .course-percent {
+            font-size: 0.85rem;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        /* Achievements */
+        .achievements-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .achievement-item {
+            text-align: center;
+            padding: 1rem;
+            background: #f7fafc;
+            border-radius: 10px;
+            transition: transform 0.3s ease;
+        }
+
+        .achievement-item:hover {
+            transform: scale(1.05);
+        }
+
+        .achievement-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 215, 0, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 0.5rem;
+            color: #FFD700;
+            font-size: 1.2rem;
+        }
+
+        .achievement-name {
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 0.9rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .achievement-xp {
+            color: #718096;
+            font-size: 0.8rem;
+        }
+
+        /* Daily Quests */
+        .quest-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.8rem;
+            background: #f7fafc;
+            border-radius: 10px;
+            margin-bottom: 0.8rem;
+        }
+
+        .quest-icon {
+            width: 36px;
+            height: 36px;
+            background: rgba(255, 215, 0, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #FFD700;
+        }
+
+        .quest-content {
+            flex: 1;
+        }
+
+        .quest-title {
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 0.95rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .quest-reward {
+            color: #718096;
+            font-size: 0.8rem;
+        }
+
+        .quest-reward i {
+            color: #FFD700;
+            margin-right: 0.2rem;
+        }
+
+        .quest-status {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .status-completed {
+            background: #48bb78;
+            color: white;
+        }
+
+        .status-pending {
+            background: #e2e8f0;
+            color: #718096;
+        }
+
+        /* Leaderboard */
+        .leaderboard-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 0.5rem;
+            background: #f7fafc;
+            border-radius: 8px;
+        }
+
+        .rank {
+            width: 28px;
+            height: 28px;
+            background: #e2e8f0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #667eea;
+        }
+
+        .rank.top-1 {
+            background: #FFD700;
+            color: #1a1a2e;
+        }
+
+        .rank.top-2 {
+            background: #C0C0C0;
+            color: #1a1a2e;
+        }
+
+        .rank.top-3 {
+            background: #CD7F32;
+            color: white;
+        }
+
+        .leaderboard-info {
+            flex: 1;
+        }
+
+        .leaderboard-name {
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 0.9rem;
+        }
+
+        .leaderboard-xp {
+            color: #718096;
+            font-size: 0.8rem;
+        }
+
+        .leaderboard-xp i {
+            color: #FFD700;
+            margin-right: 0.2rem;
+        }
+
+        /* Daily Login */
+        .daily-login {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .daily-login-text {
+            flex: 1;
+        }
+
+        .daily-login-text h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .daily-login-text p {
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+
+        .daily-login-btn {
+            padding: 0.8rem 2rem;
+            background: white;
+            color: #667eea;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .daily-login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.2);
+        }
+
+        /* Responsive */
+        @@media (max-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @@media (max-width: 768px) {
+            .navbar {
+                padding: 1rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .container {
+                padding: 0 1rem;
+            }
+
+            .welcome-section {
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+            }
+
+            .quick-stats {
+                justify-content: center;
+            }
+
+            .action-buttons {
+                justify-content: center;
+            }
+
+            .achievements-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="/" class="logo">
+                <i class="fas fa-code"></i>
+                TeachCodIT
+            </a>
+            <div class="nav-links">
+                <a href="@Url.Action("Home", "Student")" class="active">
+                    <i class="fas fa-home"></i> Главная
+                </a>
+                <a href="@Url.Action("AllCourses", "Student")">
+                    <i class="fas fa-book"></i> Курсы
+                </a>
+                <a href="@Url.Action("MyCourses", "Student")">
+                    <i class="fas fa-graduation-cap"></i> Мои курсы
+                </a>
+                <a href="@Url.Action("Achievements", "Student")">
+                    <i class="fas fa-trophy"></i> Достижения
+                </a>
+                <a href="@Url.Action("Leaderboard", "Student")">
+                    <i class="fas fa-chart-line"></i> Лидерборд
+                </a>
+            </div>
+        </div>
+
+        <div class="nav-right">
+            <div class="nav-notification">
+                <i class="far fa-bell"></i>
+                <span class="notification-badge">3</span>
+            </div>
+            <div class="nav-profile">
+                <div class="profile-avatar">
+                    @(firstName?.Substring(0, 1) ?? "С")
+                </div>
+                <div class="profile-info">
+                    <div class="profile-name">@firstName</div>
+                    <div class="profile-role">Уровень @currentLevel</div>
+                </div>
+                <i class="fas fa-chevron-down" style="color: #718096; font-size: 0.8rem;"></i>
+
+                <!-- Dropdown меню -->
+                <div class="profile-dropdown">
+                    <a href="@Url.Action("Progress", "Student")" class="dropdown-item">
+                        <i class="fas fa-chart-line"></i> Мой прогресс
+                    </a>
+                    <a href="@Url.Action("History", "Student")" class="dropdown-item">
+                        <i class="fas fa-history"></i> История решений
+                    </a>
+                    <a href="@Url.Action("WeakTopics", "Student")" class="dropdown-item">
+                        <i class="fas fa-exclamation-triangle"></i> Слабые темы
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <a href="@Url.Action("Logout", "Account")" class="dropdown-item">
+                        <i class="fas fa-sign-out-alt"></i> Выйти
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Daily Login Streak -->
+        <div class="daily-login">
+            <div class="daily-login-text">
+                <h3>🔥 Серия: @streakDays дней</h3>
+                <p>Заходите каждый день, чтобы получать бонусные XP и не терять серию!</p>
+            </div>
+            <form asp-action="DailyLogin" method="post">
+                <button type="submit" class="daily-login-btn">
+                    <i class="fas fa-check-circle"></i> Отметить вход
+                </button>
+            </form>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <a href="@Url.Action("Home", "Student")" class="tab active">
+                <i class="fas fa-home"></i> Главная
+            </a>
+            <a href="@Url.Action("AllCourses", "Student")" class="tab">
+                <i class="fas fa-book"></i> Все курсы
+            </a>
+            <a href="@Url.Action("MyCourses", "Student")" class="tab">
+                <i class="fas fa-graduation-cap"></i> Мои курсы
+            </a>
+            <a href="@Url.Action("DailyQuests", "Student")" class="tab">
+                <i class="fas fa-calendar-check"></i> Задания
+            </a>
+            <a href="@Url.Action("Progress", "Student")" class="tab">
+                <i class="fas fa-chart-line"></i> Прогресс
+            </a>
+        </div>
+
+        <!-- Welcome Section -->
+        <div class="welcome-section">
+            <div class="welcome-text">
+                <h1>С возвращением, @firstName! 👋</h1>
+                <p>Продолжай учиться! У тебя отличный прогресс</p>
+            </div>
+            <div class="quick-stats">
+                <div class="stat-item">
+                    <div class="stat-value">@totalXp</div>
+                    <div class="stat-label">Всего XP</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">@currentLevel</div>
+                    <div class="stat-label">Уровень</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">@streakDays</div>
+                    <div class="stat-label">Дней подряд</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <a href="@Url.Action("AllCourses", "Student")" class="action-btn">
+                <i class="fas fa-search"></i> Найти курсы
+            </a>
+            <a href="@Url.Action("DailyQuests", "Student")" class="action-btn">
+                <i class="fas fa-calendar-check"></i> Ежедневные задания
+            </a>
+            <a href="@Url.Action("Leaderboard", "Student")" class="action-btn">
+                <i class="fas fa-trophy"></i> Таблица лидеров
+            </a>
+        </div>
+
+        <!-- Dashboard Grid -->
+        <div class="dashboard-grid">
+            <!-- Мои курсы -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <span class="card-title">Мои курсы</span>
+                    <div class="card-icon">
+                        <i class="fas fa-book"></i>
+                    </div>
+                </div>
+
+                @if (Model?.StudentCourses != null && Model.StudentCourses.Any())
+                {
+                    <div class="courses-list">
+                        @foreach (var course in Model.StudentCourses.Take(3))
+                        {
+                            <a href="@Url.Action("Course", "Student", new { id = course.CourseId })" style="text-decoration: none;">
+                                <div class="course-item">
+                                    <div class="course-icon">
+                                        <i class="fas fa-code"></i>
+                                    </div>
+                                    <div class="course-info">
+                                        <div class="course-name">@course.CourseTitle</div>
+                                        <div class="course-progress">
+                                            <div class="course-progress-bar">
+                                                <div class="course-progress-fill" style="width: @course.ProgressPercent%"></div>
+                                            </div>
+                                            <span class="course-percent">@course.ProgressPercent%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        }
+                    </div>
+                    
+                    @if (Model.StudentCourses.Count > 3)
+                    {
+                        <div style="text-align: center; margin-top: 1rem;">
+                            <a href="@Url.Action("MyCourses", "Student")" style="color: #667eea; text-decoration: none;">
+                                Все курсы <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="empty-state" style="text-align: center; padding: 2rem;">
+                        <i class="fas fa-book-open" style="font-size: 3rem; color: #e2e8f0; margin-bottom: 1rem;"></i>
+                        <p>У вас пока нет курсов</p>
+                        <a href="@Url.Action("AllCourses", "Student")" style="color: #667eea; text-decoration: none;">
+                            Найти курсы <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                }
+            </div>
+
+            <!-- XP Progress -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <span class="card-title">Мой прогресс</span>
+                    <div class="card-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                </div>
+
+                <div class="xp-progress">
+                    <div class="xp-stats">
+                        <span>Уровень @currentLevel</span>
+                        <span>@((totalXp % 100)) / 100 XP</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill"></div>
+                    </div>
+                    <div class="level-info">
+                        <span>До уровня @(currentLevel + 1): @(100 - (totalXp % 100)) XP</span>
+                    </div>
+                </div>
+
+                <div style="margin-top: 1.5rem;">
+                    <div class="streak-value">@streakDays</div>
+                    <div class="streak-label">Дней подряд</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Achievements and Daily Quests Row -->
+        <div class="dashboard-grid">
+            <!-- Достижения -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <span class="card-title">Последние достижения</span>
+                    <div class="card-icon">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                </div>
+
+                @if (Model?.UserAchievements != null && Model.UserAchievements.Any())
+                {
+                    <div class="achievements-grid">
+                        @foreach (var achievement in Model.UserAchievements.Take(4))
+                        {
+                            <div class="achievement-item">
+                                <div class="achievement-icon">
+                                    <i class="fas @(achievement.Icon ?? "fa-star")"></i>
+                                </div>
+                                <div class="achievement-name">@achievement.AchievementTitle</div>
+                                <div class="achievement-xp">+@achievement.XPReward XP</div>
+                            </div>
+                        }
+                    </div>
+                    
+                    @if (Model.UserAchievements.Count > 4)
+                    {
+                        <div style="text-align: center; margin-top: 1rem;">
+                            <a href="@Url.Action("Achievements", "Student")" style="color: #667eea; text-decoration: none;">
+                                Все достижения <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div style="text-align: center; padding: 2rem; color: #718096;">
+                        <p>У вас пока нет достижений</p>
+                    </div>
+                }
+            </div>
+
+            <!-- Ежедневные задания -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <span class="card-title">Ежедневные задания</span>
+                    <div class="card-icon">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                </div>
+
+                @if (Model?.DailyQuests != null && Model.DailyQuests.Any())
+                {
+                    <div class="quests-list">
+                        @foreach (var quest in Model.DailyQuests)
+                        {
+                            <div class="quest-item">
+                                <div class="quest-icon">
+                                    <i class="fas fa-tasks"></i>
+                                </div>
+                                <div class="quest-content">
+                                    <div class="quest-title">@quest.QuestTitle</div>
+                                    <div class="quest-reward">
+                                        <i class="fas fa-star"></i> @quest.XPReward XP
+                                    </div>
+                                </div>
+                                <div class="quest-status @(quest.IsCompleted ? "status-completed" : "status-pending")">
+                                    @if (quest.IsCompleted)
+                                    {
+                                        <i class="fas fa-check"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="fas fa-clock"></i>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 1rem;">
+                        <a href="@Url.Action("DailyQuests", "Student")" style="color: #667eea; text-decoration: none;">
+                            Все задания <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <div style="text-align: center; padding: 2rem; color: #718096;">
+                        <p>Нет ежедневных заданий</p>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Leaderboard -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <span class="card-title">Таблица лидеров</span>
+                <div class="card-icon">
+                    <i class="fas fa-trophy"></i>
+                </div>
+            </div>
+
+            @if (Model?.Leaderboard != null && Model.Leaderboard.Any())
+            {
+                <div class="leaderboard-list">
+                    @foreach (var entry in Model.Leaderboard.Take(5))
+                    {
+                        <div class="leaderboard-item">
+                            <div class="rank @(entry.Rank == 1 ? "top-1" : entry.Rank == 2 ? "top-2" : entry.Rank == 3 ? "top-3" : "")">
+                                @entry.Rank
+                            </div>
+                            <div class="leaderboard-info">
+                                <div class="leaderboard-name">@(entry.FullName ?? entry.UserName)</div>
+                                <div class="leaderboard-xp">
+                                    <i class="fas fa-star"></i> @entry.XP XP
+                                </div>
+                            </div>
+                            <div>🔥 @entry.StreakDays</div>
+                        </div>
+                    }
+                </div>
+                
+                <div style="text-align: center; margin-top: 1rem;">
+                    <a href="@Url.Action("Leaderboard", "Student")" style="color: #667eea; text-decoration: none;">
+                        Полная таблица <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            }
+            else
+            {
+                <div style="text-align: center; padding: 2rem; color: #718096;">
+                    <p>Пока нет данных</p>
+                </div>
+            }
+        </div>
+
+        <!-- Слабые темы (если есть) -->
+        @if (Model?.WeakTopics != null && Model.WeakTopics.Any())
+        {
+            <div class="dashboard-card" style="margin-top: 2rem;">
+                <div class="card-header">
+                    <span class="card-title">Темы для повторения</span>
+                    <div class="card-icon">
+                        <i class="fas fa-exclamation-triangle" style="color: #ed8936;"></i>
+                    </div>
+                </div>
+
+                <div class="topics-list">
+                    @foreach (var topic in Model.WeakTopics)
+                    {
+                        <div style="display: flex; align-items: center; gap: 1rem; padding: 0.5rem; background: #f7fafc; border-radius: 8px; margin-bottom: 0.5rem;">
+                            <span style="color: #ed8936;"><i class="fas fa-exclamation-circle"></i></span>
+                            <span style="flex: 1; color: #2d3748;">@topic.TopicName</span>
+                            <span style="color: #718096; font-size: 0.85rem;">@topic.ErrorRate% ошибок</span>
+                            <a href="@topic.PracticeUrl" style="color: #667eea; text-decoration: none;">Практиковать <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</body>
+</html>

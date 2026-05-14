@@ -1,0 +1,1802 @@
+﻿@model TeachCodIT.Models.ViewModels.TeacherDashboardViewModel
+@{
+    ViewData["Title"] = "Панель учителя - TeachCodIT";
+    var teacherName = Model.TeacherName;
+}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+
+        /* Navigation */
+        .navbar {
+            background: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #48bb78;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+            .logo i {
+                color: #FFD700;
+            }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+            .nav-links a {
+                color: #4a5568;
+                text-decoration: none;
+                font-weight: 500;
+                transition: color 0.3s ease;
+                display: flex;
+                align-items: center;
+                gap: 0.3rem;
+            }
+
+                .nav-links a:hover,
+                .nav-links a.active {
+                    color: #48bb78;
+                }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .nav-notification {
+            position: relative;
+            cursor: pointer;
+        }
+
+            .nav-notification i {
+                font-size: 1.3rem;
+                color: #4a5568;
+            }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ff5757;
+            color: white;
+            font-size: 0.7rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 10px;
+        }
+
+        .nav-profile {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            cursor: pointer;
+            padding: 0.3rem 0.8rem;
+            border-radius: 10px;
+            transition: background 0.3s ease;
+            position: relative;
+        }
+
+            .nav-profile:hover {
+                background: #f7fafc;
+            }
+
+        .profile-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .profile-info {
+            display: none;
+        }
+
+        @@media (min-width: 768px) {
+            .profile-info {
+                display: block;
+            }
+        }
+
+        .profile-name {
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 0.95rem;
+        }
+
+        .profile-role {
+            font-size: 0.8rem;
+            color: #718096;
+        }
+
+        /* Profile Dropdown */
+        .profile-dropdown {
+            position: absolute;
+            top: calc(100% + 8px); 
+            right: 0;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            padding: 0.5rem 0;
+            min-width: 200px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.2s ease;
+        }
+
+        /* показываем */
+        .nav-profile:hover .profile-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            padding: 0.7rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #4a5568;
+            text-decoration: none;
+            transition: background 0.3s ease;
+        }
+
+            .dropdown-item:hover {
+                background: #f7fafc;
+                color: #48bb78;
+            }
+
+            .dropdown-item i {
+                width: 20px;
+                color: #718096;
+            }
+
+        .dropdown-divider {
+            height: 1px;
+            background: #e2e8f0;
+            margin: 0.5rem 0;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        /* Welcome Section */
+        .welcome-section {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            border-radius: 20px;
+            padding: 2rem;
+            color: white;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+
+        .welcome-text {
+            flex: 2;
+            min-width: 300px;
+        }
+
+            .welcome-text h1 {
+                font-size: 2rem;
+                font-weight: 700;
+                margin-bottom: 0.5rem;
+            }
+
+            .welcome-text p {
+                opacity: 0.9;
+                font-size: 1.1rem;
+            }
+
+        .quick-stats {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .stat-item {
+            text-align: center;
+            min-width: 80px;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #FFD700;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+        }
+
+        .action-btn {
+            padding: 0.8rem 1.5rem;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            color: #4a5568;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            flex: 0 1 auto;
+        }
+
+            .action-btn:hover {
+                background: #48bb78;
+                color: white;
+                border-color: #48bb78;
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(72, 187, 120, 0.2);
+            }
+
+            .action-btn i {
+                font-size: 1rem;
+            }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 0.5rem;
+        }
+
+        .tab {
+            padding: 0.5rem 1.5rem;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-bottom: none;
+            border-radius: 10px 10px 0 0;
+            color: #4a5568;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+            .tab:hover,
+            .tab.active {
+                background: #48bb78;
+                color: white;
+                border-color: #48bb78;
+            }
+
+            .tab i {
+                margin-right: 0.5rem;
+            }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .dashboard-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            height: fit-content;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .card-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(72, 187, 120, 0.1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #48bb78;
+        }
+
+        /* Courses Table */
+        .courses-table {
+            width: 100%;
+        }
+
+        .course-row {
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+            gap: 1.5rem;
+            transition: background 0.3s ease;
+        }
+
+            .course-row:hover {
+                background: #f7fafc;
+            }
+
+        .course-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+            .course-row:last-child {
+                border-bottom: none;
+            }
+
+        .course-info {
+            min-width: 200px;
+        }
+
+        .course-title {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 0.3rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 300px;
+        }
+
+        .course-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.85rem;
+            color: #718096;
+            flex-wrap: wrap;
+        }
+
+            .course-meta i {
+                margin-right: 0.3rem;
+            }
+
+        .course-status {
+            min-width: 100px;
+            text-align: center;
+        }
+
+        .status-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            display: inline-block;
+            white-space: nowrap;
+        }
+
+        .status-published {
+            background: rgba(72, 187, 120, 0.1);
+            color: #48bb78;
+        }
+
+        .status-draft {
+            background: rgba(160, 174, 192, 0.1);
+            color: #718096;
+        }
+
+        .course-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .action-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #718096;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+            .action-icon:hover {
+                background: #48bb78;
+                color: white;
+            }
+
+            .action-icon.delete:hover {
+                background: #ff5757;
+            }
+
+        /* Student Stats */
+        .student-stats {
+            display: grid;
+            gap: 0.8rem;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px dashed #e2e8f0;
+        }
+
+            .stat-row:last-child {
+                border-bottom: none;
+            }
+
+        .stat-name {
+            color: #4a5568;
+        }
+
+        .stat-value {
+            font-weight: 600;
+            color: #e8d74b;
+        }
+
+        /* Recent Activity */
+        .activity-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+            .activity-list::-webkit-scrollbar {
+                width: 6px;
+            }
+
+            .activity-list::-webkit-scrollbar-track {
+                background: #e2e8f0;
+                border-radius: 10px;
+            }
+
+            .activity-list::-webkit-scrollbar-thumb {
+                background: #48bb78;
+                border-radius: 10px;
+            }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.8rem;
+            background: #f7fafc;
+            border-radius: 10px;
+        }
+
+        .activity-icon {
+            width: 36px;
+            height: 36px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #48bb78;
+            flex-shrink: 0;
+        }
+
+        .activity-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .activity-text {
+            color: #2d3748;
+            font-size: 0.95rem;
+            margin-bottom: 0.2rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .activity-time {
+            color: #718096;
+            font-size: 0.8rem;
+        }
+
+        /* Top Students */
+        .top-students-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            margin-top: 1rem;
+        }
+
+        .top-student-item {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 0.5rem;
+            background: #f7fafc;
+            border-radius: 8px;
+        }
+
+        .top-student-rank {
+            width: 30px;
+            height: 30px;
+            background: #FFD700;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: #1a1a2e;
+            flex-shrink: 0;
+        }
+
+        .top-student-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .top-student-name {
+            font-weight: 600;
+            color: #2d3748;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .top-student-xp {
+            font-size: 0.85rem;
+            color: #718096;
+        }
+
+            .top-student-xp i {
+                color: #FFD700;
+                margin-right: 0.2rem;
+            }
+
+        /* Courses Grid */
+        .courses-section {
+            margin-top: 2rem;
+        }
+
+        .courses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .course-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+            .course-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            }
+
+        .course-header {
+            height: 100px;
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            padding: 1rem;
+            color: white;
+        }
+
+            .course-header h3 {
+                font-size: 1.2rem;
+                font-weight: 600;
+                margin-bottom: 0.3rem;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .course-header p {
+                font-size: 0.85rem;
+                opacity: 0.9;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+        .course-body {
+            padding: 1rem;
+            flex: 1;
+        }
+
+        .course-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.8rem;
+            font-size: 0.9rem;
+            color: #718096;
+        }
+
+            .course-stats i {
+                margin-right: 0.3rem;
+                color: #48bb78;
+            }
+
+        .course-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            padding: 1rem;
+            border-top: 1px solid #e2e8f0;
+            flex-wrap: wrap;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #718096;
+        }
+
+            .empty-state i {
+                font-size: 3rem;
+                color: #e2e8f0;
+                margin-bottom: 1rem;
+            }
+
+            .empty-state p {
+                margin-bottom: 1rem;
+            }
+
+            .empty-state a {
+                color: #48bb78;
+                text-decoration: none;
+                font-weight: 500;
+            }
+
+                .empty-state a:hover {
+                    text-decoration: underline;
+                }
+
+        /* View All Link */
+        .view-all-link {
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+            .view-all-link a {
+                color: #48bb78;
+                text-decoration: none;
+                font-weight: 500;
+                display: inline-flex;
+                align-items: center;
+                gap: 0.3rem;
+            }
+
+                .view-all-link a:hover {
+                    text-decoration: underline;
+                }
+
+        /* Section Header */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+            .section-header .card-title {
+                margin-bottom: 0;
+            }
+
+        /* Responsive */
+        @@media (max-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .course-row {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+            }
+
+            .course-status {
+                text-align: left;
+            }
+
+            .course-actions {
+                justify-content: flex-start;
+            }
+        }
+
+        @@media (max-width: 768px) {
+            .navbar {
+                padding: 1rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .container {
+                padding: 0 1rem;
+            }
+
+            .welcome-section {
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+            }
+
+            .quick-stats {
+                justify-content: center;
+            }
+
+            .action-buttons {
+                justify-content: center;
+            }
+
+            .course-row {
+                grid-template-columns: 1fr;
+            }
+
+            .courses-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Fix для иконок */
+        .fas, .far {
+            pointer-events: none;
+            *
+
+        {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+
+        /* Navigation */
+        .navbar {
+            background: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #48bb78;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+            .logo i {
+                color: #FFD700;
+            }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+            .nav-links a {
+                color: #4a5568;
+                text-decoration: none;
+                font-weight: 500;
+                transition: color 0.3s ease;
+                display: flex;
+                align-items: center;
+                gap: 0.3rem;
+            }
+
+                .nav-links a:hover,
+                .nav-links a.active {
+                    color: #48bb78;
+                }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .nav-notification {
+            position: relative;
+            cursor: pointer;
+        }
+
+            .nav-notification i {
+                font-size: 1.3rem;
+                color: #4a5568;
+            }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ff5757;
+            color: white;
+            font-size: 0.7rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 10px;
+        }
+
+        .nav-profile {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            cursor: pointer;
+            padding: 0.3rem 0.8rem;
+            border-radius: 10px;
+            transition: background 0.3s ease;
+            position: relative;
+        }
+
+            .nav-profile:hover {
+                background: #f7fafc;
+            }
+
+        .profile-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .profile-info {
+            display: none;
+        }
+
+        @@media (min-width: 768px) {
+            .profile-info {
+                display: block;
+            }
+        }
+
+        .profile-name {
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 0.95rem;
+        }
+
+        .profile-role {
+            font-size: 0.8rem;
+            color: #718096;
+        }
+
+        /* Profile Dropdown */
+        .profile-dropdown {
+            position: absolute;
+            top: calc(100% + 8px); 
+            right: 0;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            padding: 0.5rem 0;
+            min-width: 200px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.2s ease;
+        }
+
+        /* показываем */
+        .nav-profile:hover .profile-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            padding: 0.7rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #4a5568;
+            text-decoration: none;
+            transition: background 0.3s ease;
+        }
+
+            .dropdown-item:hover {
+                background: #f7fafc;
+                color: #48bb78;
+            }
+
+            .dropdown-item i {
+                width: 20px;
+                color: #718096;
+            }
+
+        .dropdown-divider {
+            height: 1px;
+            background: #e2e8f0;
+            margin: 0.5rem 0;
+        }
+
+        /* Остальные стили остаются без изменений */
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        /* Welcome Section */
+        .welcome-section {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            border-radius: 20px;
+            padding: 2rem;
+            color: white;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+
+        .welcome-text {
+            flex: 2;
+            min-width: 300px;
+        }
+
+            .welcome-text h1 {
+                font-size: 2rem;
+                font-weight: 700;
+                margin-bottom: 0.5rem;
+            }
+
+            .welcome-text p {
+                opacity: 0.9;
+                font-size: 1.1rem;
+            }
+
+        .quick-stats {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .stat-item {
+            text-align: center;
+            min-width: 80px;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #FFD700;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+        }
+
+        .action-btn {
+            padding: 0.8rem 1.5rem;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            color: #4a5568;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            flex: 0 1 auto;
+        }
+
+            .action-btn:hover {
+                background: #48bb78;
+                color: white;
+                border-color: #48bb78;
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(72, 187, 120, 0.2);
+            }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 0.5rem;
+        }
+
+        .tab {
+            padding: 0.5rem 1.5rem;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-bottom: none;
+            border-radius: 10px 10px 0 0;
+            color: #4a5568;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+            .tab:hover,
+            .tab.active {
+                background: #48bb78;
+                color: white;
+                border-color: #48bb78;
+            }
+
+            .tab i {
+                margin-right: 0.5rem;
+            }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .dashboard-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            height: fit-content;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .card-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(72, 187, 120, 0.1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #48bb78;
+        }
+
+        /* Courses Table */
+        .courses-table {
+            width: 100%;
+        }
+
+        .course-row {
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+            transition: background 0.3s ease;
+            gap: 1rem;
+        }
+
+            .course-row:hover {
+                background: #f7fafc;
+            }
+
+            .course-row:last-child {
+                border-bottom: none;
+            }
+
+        .course-info {
+            min-width: 200px;
+        }
+
+        .course-title {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 0.3rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 300px;
+        }
+
+        .course-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.85rem;
+            color: #718096;
+            flex-wrap: wrap;
+        }
+
+        .course-status {
+            min-width: 100px;
+            text-align: center;
+        }
+
+        .status-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            display: inline-block;
+            white-space: nowrap;
+        }
+
+        .status-published {
+            background: rgba(72, 187, 120, 0.1);
+            color: #48bb78;
+        }
+
+        .status-draft {
+            background: rgba(160, 174, 192, 0.1);
+            color: #718096;
+        }
+
+        .course-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .action-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #718096;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+            .action-icon:hover {
+                background: #48bb78;
+                color: white;
+            }
+
+            .action-icon.delete:hover {
+                background: #ff5757;
+            }
+
+        /* Student Stats */
+        .student-stats {
+            display: grid;
+            gap: 0.8rem;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px dashed #e2e8f0;
+        }
+
+            .stat-row:last-child {
+                border-bottom: none;
+            }
+
+        .stat-name {
+            color: #4a5568;
+        }
+
+        .stat-value {
+            font-weight: 600;
+            color: #48bb78;
+        }
+
+        /* Recent Activity */
+        .activity-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.8rem;
+            background: #f7fafc;
+            border-radius: 10px;
+        }
+
+        .activity-icon {
+            width: 36px;
+            height: 36px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #48bb78;
+            flex-shrink: 0;
+        }
+
+        .activity-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .activity-text {
+            color: #2d3748;
+            font-size: 0.95rem;
+            margin-bottom: 0.2rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .activity-time {
+            color: #718096;
+            font-size: 0.8rem;
+        }
+
+        /* Top Students */
+        .top-students-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            margin-top: 1rem;
+        }
+
+        .top-student-item {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 0.5rem;
+            background: #f7fafc;
+            border-radius: 8px;
+        }
+
+        .top-student-rank {
+            width: 30px;
+            height: 30px;
+            background: #FFD700;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: #1a1a2e;
+            flex-shrink: 0;
+        }
+
+        .top-student-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .top-student-name {
+            font-weight: 600;
+            color: #2d3748;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .top-student-xp {
+            font-size: 0.85rem;
+            color: #718096;
+        }
+
+        /* Courses Grid */
+        .courses-section {
+            margin-top: 2rem;
+        }
+
+        .courses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .course-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+            .course-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            }
+
+        .course-header {
+            height: 100px;
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            padding: 1rem;
+            color: white;
+        }
+
+            .course-header h3 {
+                font-size: 1.2rem;
+                font-weight: 600;
+                margin-bottom: 0.3rem;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .course-header p {
+                font-size: 0.85rem;
+                opacity: 0.9;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+        .course-body {
+            padding: 1rem;
+            flex: 1;
+        }
+
+        .course-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.8rem;
+            font-size: 0.9rem;
+            color: #718096;
+        }
+
+        .course-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            padding: 1rem;
+            border-top: 1px solid #e2e8f0;
+            flex-wrap: wrap;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #718096;
+        }
+
+            .empty-state i {
+                font-size: 3rem;
+                color: #e2e8f0;
+                margin-bottom: 1rem;
+            }
+
+        /* View All Link */
+        .view-all-link {
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        /* Section Header */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        /* Responsive */
+        @@media (max-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .course-row {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+            }
+
+            .course-status {
+                text-align: left;
+            }
+
+            .course-actions {
+                justify-content: flex-start;
+            }
+        }
+
+        @@media (max-width: 768px) {
+            .navbar {
+                padding: 1rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .container {
+                padding: 0 1rem;
+            }
+
+            .welcome-section {
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+            }
+
+            .quick-stats {
+                justify-content: center;
+            }
+
+            .action-buttons {
+                justify-content: center;
+            }
+
+            .course-row {
+                grid-template-columns: 1fr;
+            }
+
+            .courses-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .fas, .far {
+            pointer-events: none;
+        }
+
+        .course-right {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 12px;
+            min-width: 200px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="/" class="logo">
+                <i class="fas fa-chalkboard-teacher"></i>
+                TeachCodIT
+            </a>
+            <div class="nav-links">
+                <a href="@Url.Action("Dashboard", "Teacher")" class="active">
+                    <i class="fas fa-home"></i> Главная
+                </a>
+                <a href="@Url.Action("Dashboard", "Teacher")">
+                    <i class="fas fa-book"></i> Курсы
+                </a>
+                <a href="@Url.Action("Analytics", "Teacher", new { courseId = 0 })">
+                    <i class="fas fa-chart-bar"></i> Аналитика
+                </a>
+            </div>
+        </div>
+
+        <div class="nav-right">
+
+            <div class="nav-profile">
+                <div class="profile-avatar">
+                    @teacherName?.Substring(0, 1)?.ToUpper()
+                </div>
+                <div class="profile-info">
+                    <div class="profile-name">@teacherName</div>
+                    <div class="profile-role">Преподаватель</div>
+                </div>
+                <i class="fas fa-chevron-down" style="color: #718096; font-size: 0.8rem;"></i>
+
+                <!-- Dropdown меню с добавленными ссылками на профиль и настройки -->
+                <div class="profile-dropdown">
+                    <a href="@Url.Action("Profile", "Teacher")" class="dropdown-item">
+                        <i class="fas fa-user"></i> Мой профиль
+                    </a>
+                    <a href="@Url.Action("Settings", "Teacher")" class="dropdown-item">
+                        <i class="fas fa-cog"></i> Настройки
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <a href="@Url.Action("Progress", "Teacher")" class="dropdown-item">
+                        <i class="fas fa-chart-line"></i> Статистика
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <form asp-action="Logout" asp-controller="Account" method="post" style="margin: 0; padding: 0;">
+                        <button type="submit" class="dropdown-item" style="background: none; border: none; width: 100%; text-align: left; cursor: pointer;">
+                            <i class="fas fa-sign-out-alt"></i> Выйти
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Welcome Section -->
+        <div class="welcome-section">
+            <div class="welcome-text">
+                <h1>Здравствуйте, @teacherName! 👋</h1>
+                <p>Управляйте курсами, отслеживайте прогресс студентов и создавайте новые материалы</p>
+            </div>
+            <div class="quick-stats">
+                <div class="stat-item">
+                    <div class="stat-value">@Model.TotalCourses</div>
+                    <div class="stat-label">Курсов</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">@Model.TotalStudents</div>
+                    <div class="stat-label">Студентов</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">@Model.TotalTasks</div>
+                    <div class="stat-label">Заданий</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <a href="@Url.Action("CreateCourse", "Teacher")" class="action-btn">
+                <i class="fas fa-plus-circle"></i> Создать курс
+            </a>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <a href="@Url.Action("Dashboard", "Teacher")" class="tab active">
+                <i class="fas fa-home"></i> Главная
+            </a>
+        </div>
+
+        <!-- Dashboard Grid -->
+        <div class="dashboard-grid">
+            <!-- Recent Courses -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <span class="card-title">Мои курсы</span>
+                    <div class="card-icon">
+                        <i class="fas fa-book"></i>
+                    </div>
+                </div>
+
+                @if (Model.Courses != null && Model.Courses.Any())
+                {
+                    <div class="courses-table">
+                        @foreach (var course in Model.Courses.Take(5))
+                        {
+                            <div class="course-row" style="display: flex; align-items: center; justify-content: space-between; padding: 1rem; border-bottom: 1px solid #e2e8f0;">
+                                <!-- Левая колонка: Информация о курсе -->
+                                <a href="@Url.Action("Modules", "Teacher", new { courseId = course.IdCourse })"
+                                   style="flex: 2; text-decoration: none; color: inherit; display: flex; flex-direction: column; gap: 0.3rem;">
+                                    <div class="course-title" style="font-weight: 600; color: #2d3748;">@course.Title</div>
+                                    <div class="course-meta" style="display: flex; gap: 1rem; font-size: 0.85rem; color: #718096;">
+                                        <span><i class="far fa-calendar-alt"></i> @course.CreatedAt?.ToString("dd.MM.yyyy")</span>
+                                        <span><i class="fas fa-users"></i> @(course.StudentCourses?.Count ?? 0) студентов</span>
+                                    </div>
+                                </a>
+
+                                <!-- Центральная колонка: Статус -->
+                                <div class="course-status" style="min-width: 100px; text-align: center;">
+                                    <span class="status-badge @(course.IsPublished == true ? "status-published" : "status-draft")"
+                                          style="padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.8rem; font-weight: 500; display: inline-block;
+                                     @(course.IsPublished == true ? "background: rgba(72, 187, 120, 0.1); color: #48bb78;" : "background: rgba(160, 174, 192, 0.1); color: #718096;")">
+                                        @(course.IsPublished == true ? "Опубликован" : "Черновик")
+                                    </span>
+                                </div>
+
+                                <!-- Правая колонка: Иконки действий -->
+                                <div class="course-actions" onclick="event.stopPropagation();" style="display: flex; align-items: center; gap: 8px;">
+                                    <a href="@Url.Action("EditCourse", "Teacher", new { id = course.IdCourse })" class="action-icon" title="Редактировать"
+                                       style="width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #718096; transition: all 0.3s ease;">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form asp-action="DeleteCourse" method="post" style="display: inline; margin: 0;"
+                                          onsubmit="return confirm('Вы уверены, что хотите удалить курс?');">
+                                        <input type="hidden" name="id" value="@course.IdCourse" />
+                                        <button type="submit" class="action-icon delete" title="Удалить"
+                                                style="border: none; background: none; cursor: pointer; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #718096; transition: all 0.3s ease;">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    @if (Model.Courses.Count > 5)
+                    {
+                        <div class="view-all-link" style="margin-top: 1rem; text-align: center;">
+                            <a href="@Url.Action("Dashboard", "Teacher")" style="color: #48bb78; font-weight: 500;">
+                                Показать все курсы <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="empty-state">
+                        <i class="fas fa-book-open"></i>
+                        <p>У вас пока нет курсов</p>
+                        <a href="@Url.Action("CreateCourse", "Teacher")">
+                            Создать первый курс <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                }
+            </div>
+
+            <!-- Student Stats -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <span class="card-title">Статистика студентов</span>
+                    <div class="card-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                </div>
+
+                <div class="student-stats">
+                    <div class="stat-row">
+                        <span class="stat-name">Всего студентов</span>
+                        <span class="stat-value">@Model.TotalStudents</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-name">Активных сегодня</span>
+                        <span class="stat-value">@Model.ActiveStudentsToday</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-name">Новых за неделю</span>
+                        <span class="stat-value">@Model.NewStudentsWeek</span>
+                    </div>
+                </div>
+
+                @if (Model.TopStudents != null && Model.TopStudents.Any())
+                {
+                    <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #e2e8f0;">
+                        <h4 style="color: #2d3748; margin-bottom: 1rem;">🏆 Топ студентов</h4>
+                        <div class="top-students-list">
+                            @{
+                                var rank = 1;
+                                var rankColors = new[] { "#FFD700", "#C0C0C0", "#CD7F32" };
+                            }
+                            @foreach (var student in Model.TopStudents.Take(3))
+                            {
+                                <div class="top-student-item">
+                                    <div class="top-student-rank" style="background: @(rank <= 3 ? rankColors[rank-1] : "#e2e8f0"); color: @(rank == 3 ? "white" : "#1a1a2e");">
+                                        @rank
+                                    </div>
+                                    <div class="top-student-info">
+                                        <div class="top-student-name">@student.LoginUser</div>
+                                        <div class="top-student-xp">
+                                            <i class="fas fa-star"></i> @student.UserProgress?.Xp XP
+                                        </div>
+                                    </div>
+                                </div>
+                                rank++;
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+
+    </div>
+</body>
+</html>

@@ -1,0 +1,244 @@
+﻿@model TeachCodIT.Models.Course
+@{
+    ViewData["Title"] = "Создание курса - TeachCodIT";
+}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #48bb78;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+            .logo i {
+                color: #FFD700;
+            }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+            .nav-links a {
+                color: #4a5568;
+                text-decoration: none;
+                font-weight: 500;
+            }
+
+                .nav-links a:hover {
+                    color: #48bb78;
+                }
+
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .page-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .back-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #4a5568;
+            text-decoration: none;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+            .back-btn:hover {
+                background: #48bb78;
+                color: white;
+                transform: translateX(-3px);
+            }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2d3748;
+        }
+
+        .form-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            color: #2d3748;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+            .form-control:focus {
+                outline: none;
+                border-color: #48bb78;
+                box-shadow: 0 0 0 3px rgba(72, 187, 120, 0.1);
+            }
+
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .form-check {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+            .form-check input {
+                width: 18px;
+                height: 18px;
+                accent-color: #48bb78;
+            }
+
+        .btn {
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+        }
+
+            .btn-primary:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(72, 187, 120, 0.3);
+            }
+
+        .btn-secondary {
+            background: white;
+            color: #4a5568;
+            border: 1px solid #e2e8f0;
+        }
+
+            .btn-secondary:hover {
+                background: #f7fafc;
+            }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="logo">
+            <i class="fas fa-chalkboard-teacher"></i>
+            TeachCodIT
+        </a>
+        <div class="nav-links">
+            <a href="@Url.Action("Dashboard", "Teacher")">Главная</a>
+            <a href="@Url.Action("Dashboard", "Teacher")">Курсы</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <a href="@Url.Action("Dashboard", "Teacher")" class="back-btn">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <h1 class="page-title">Создание нового курса</h1>
+        </div>
+
+        <div class="form-card">
+            <form asp-action="CreateCourse" method="post">
+                <div class="form-group">
+                    <label asp-for="Title" class="form-label">Название курса</label>
+                    <input asp-for="Title" class="form-control" placeholder="Например: Основы C#" required />
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Description" class="form-label">Описание</label>
+                    <textarea asp-for="Description" class="form-control" placeholder="Опишите, чему научится студент..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-check">
+                        <input asp-for="IsPublished" type="checkbox" />
+                        <span>Опубликовать сразу после создания</span>
+                    </label>
+                </div>
+
+                <div class="button-group">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Создать курс
+                    </button>
+                    <a href="@Url.Action("Dashboard", "Teacher")" class="btn btn-secondary">
+                        Отмена
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

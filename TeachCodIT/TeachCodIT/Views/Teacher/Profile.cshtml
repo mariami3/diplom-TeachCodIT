@@ -1,0 +1,769 @@
+﻿@model TeachCodIT.Models.ViewModels.TeacherProfileViewModel
+@{
+    ViewData["Title"] = "Мой профиль - Преподаватель";
+    var fullName = $"{Model?.Profile?.FirstName} {Model?.Profile?.LastName}";
+    if (string.IsNullOrWhiteSpace(fullName))
+        fullName = Model?.User?.LoginUser ?? "Преподаватель";
+}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #48bb78;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo i {
+            color: #FFD700;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .nav-links a {
+            color: #4a5568;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: #48bb78;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .nav-notification {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .nav-notification i {
+            font-size: 1.3rem;
+            color: #4a5568;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ff5757;
+            color: white;
+            font-size: 0.7rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 10px;
+        }
+
+        .nav-profile {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            cursor: pointer;
+            padding: 0.3rem 0.8rem;
+            border-radius: 10px;
+            transition: background 0.3s ease;
+            position: relative;
+        }
+
+        .nav-profile:hover {
+            background: #f7fafc;
+        }
+
+        .profile-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .profile-info {
+            display: none;
+        }
+
+        @@media (min-width: 768px) {
+            .profile-info {
+                display: block;
+            }
+        }
+
+        .profile-name {
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 0.95rem;
+        }
+
+        .profile-role {
+            font-size: 0.8rem;
+            color: #718096;
+        }
+
+        .profile-dropdown {
+            position: absolute;
+            top: calc(100% + 8px); /* небольшой отступ */
+            right: 0;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            padding: 0.5rem 0;
+            min-width: 200px;
+            /* вместо display */
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.2s ease;
+        }
+
+        /* показываем */
+        .nav-profile:hover .profile-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            padding: 0.7rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #4a5568;
+            text-decoration: none;
+            transition: background 0.3s ease;
+        }
+
+        .dropdown-item:hover {
+            background: #f7fafc;
+            color: #48bb78;
+        }
+
+        .dropdown-item i {
+            width: 20px;
+            color: #718096;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: #e2e8f0;
+            margin: 0.5rem 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 0.5rem 1.5rem;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-bottom: none;
+            border-radius: 10px 10px 0 0;
+            color: #4a5568;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .tab:hover,
+        .tab.active {
+            background: #48bb78;
+            color: white;
+            border-color: #48bb78;
+        }
+
+        .tab i {
+            margin-right: 0.5rem;
+        }
+
+        .profile-header {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .avatar-large {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+            font-weight: 600;
+            box-shadow: 0 10px 20px rgba(72, 187, 120, 0.3);
+        }
+
+        .profile-title {
+            flex: 1;
+        }
+
+        .profile-title h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-title p {
+            color: #718096;
+            font-size: 1rem;
+        }
+
+        .teacher-badge {
+            background: #48bb78;
+            color: white;
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .profile-stats {
+            display: flex;
+            gap: 2rem;
+            background: #f7fafc;
+            padding: 1rem 2rem;
+            border-radius: 15px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #48bb78;
+        }
+
+        .stat-label {
+            color: #718096;
+            font-size: 0.85rem;
+        }
+
+        .profile-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .profile-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .edit-btn {
+            padding: 0.4rem 1rem;
+            background: #48bb78;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .edit-btn:hover {
+            background: #38a169;
+            transform: translateY(-2px);
+        }
+
+        .info-row {
+            display: flex;
+            margin-bottom: 1rem;
+            padding: 0.5rem 0;
+            border-bottom: 1px dashed #e2e8f0;
+        }
+
+        .info-label {
+            width: 120px;
+            color: #718096;
+            font-weight: 500;
+        }
+
+        .info-value {
+            flex: 1;
+            color: #2d3748;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            background: rgba(72, 187, 120, 0.1);
+            color: #48bb78;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-card {
+            background: #f7fafc;
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .stat-card .value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #48bb78;
+        }
+
+        .stat-card .label {
+            color: #718096;
+            font-size: 0.85rem;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2d3748;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #718096;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            color: #2d3748;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #48bb78;
+            box-shadow: 0 0 0 3px rgba(72, 187, 120, 0.1);
+        }
+
+        textarea.form-control {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(72, 187, 120, 0.3);
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+
+        .btn-secondary:hover {
+            background: #cbd5e0;
+        }
+
+        @@media (max-width: 768px) {
+            .profile-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .profile-stats {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="/" class="logo">
+                <i class="fas fa-chalkboard-teacher"></i> TeachCodIT
+            </a>
+            <div class="nav-links">
+                <a href="@Url.Action("Dashboard", "Teacher")">
+                    <i class="fas fa-home"></i> Главная
+                </a>
+                <a href="@Url.Action("Courses", "Teacher")">
+                    <i class="fas fa-book"></i> Курсы
+                </a>
+                <a href="@Url.Action("Students", "Teacher")">
+                    <i class="fas fa-users"></i> Студенты
+                </a>
+            </div>
+        </div>
+
+        <div class="nav-right"> 
+            <div class="nav-profile">
+                <div class="profile-avatar">
+                    @(Model?.Profile?.FirstName?.Substring(0, 1) ?? Model?.User?.LoginUser?.Substring(0, 1) ?? "У")
+                </div>
+                <div class="profile-info">
+                    <div class="profile-name">@fullName</div>
+                    <div class="profile-role">Преподаватель</div>
+                </div>
+                <i class="fas fa-chevron-down" style="color: #718096; font-size: 0.8rem;"></i>
+
+                <div class="profile-dropdown">
+                    <a href="@Url.Action("Profile", "Teacher")" class="dropdown-item">
+                        <i class="fas fa-user"></i> Мой профиль
+                    </a>
+                    <a href="@Url.Action("Settings", "Teacher")" class="dropdown-item">
+                        <i class="fas fa-cog"></i> Настройки
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <a href="@Url.Action("Logout", "Account")" class="dropdown-item">
+                        <i class="fas fa-sign-out-alt"></i> Выйти
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="tabs">
+            <a href="@Url.Action("Dashboard", "Teacher")" class="tab">
+                <i class="fas fa-home"></i> Главная
+            </a>
+            <a href="@Url.Action("Profile", "Teacher")" class="tab active">
+                <i class="fas fa-user"></i> Профиль
+            </a>
+            <a href="@Url.Action("Settings", "Teacher")" class="tab">
+                <i class="fas fa-cog"></i> Настройки
+            </a>
+        </div>
+
+        <div class="profile-header">
+            <div class="avatar-large">
+                @(Model?.Profile?.FirstName?.Substring(0, 1) ?? Model?.User?.LoginUser?.Substring(0, 1) ?? "У")
+            </div>
+            <div class="profile-title">
+                <h1>@fullName</h1>
+                <p><i class="fas fa-envelope"></i> @Model?.User?.Email</p>
+                <p><i class="fas fa-calendar-alt"></i> Преподаватель с @(Model?.User?.RegistrationDate.ToString("MMMM yyyy") ?? "недавно")</p>
+                <span class="teacher-badge"><i class="fas fa-chalkboard-teacher"></i> Преподаватель</span>
+            </div>
+            <div class="profile-stats">
+                <div class="stat">
+                    <div class="stat-value">@(Model?.TotalCourses ?? 0)</div>
+                    <div class="stat-label">Моих курсов</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">@(Model?.TotalStudents ?? 0)</div>
+                    <div class="stat-label">Студентов</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">@(Model?.TotalTasks ?? 0)</div>
+                    <div class="stat-label">Заданий</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="profile-grid">
+            <div class="profile-card">
+                <div class="card-header">
+                    <span class="card-title">Личная информация</span>
+                    <button class="edit-btn" onclick="openModal('infoModal')">
+                        <i class="fas fa-edit"></i> Редактировать
+                    </button>
+                </div>
+
+                <div class="info-row">
+                    <div class="info-label">Имя</div>
+                    <div class="info-value">@(Model?.Profile?.FirstName ?? "—")</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Фамилия</div>
+                    <div class="info-value">@(Model?.Profile?.LastName ?? "—")</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Логин</div>
+                    <div class="info-value">@(Model?.User?.LoginUser ?? "—")</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Email</div>
+                    <div class="info-value">@(Model?.User?.Email ?? "—")</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Роль</div>
+                    <div class="info-value"><span class="badge"><i class="fas fa-chalkboard-teacher"></i> Преподаватель</span></div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">О себе</div>
+                    <div class="info-value">@(Model?.Profile?.Bio ?? "Преподаватель платформы TeachCodIT")</div>
+                </div>
+            </div>
+
+            <div class="profile-card">
+                <div class="card-header">
+                    <span class="card-title">Моя статистика</span>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="value">@(Model?.TotalCourses ?? 0)</div>
+                        <div class="label">Всего курсов</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="value">@(Model?.PublishedCourses ?? 0)</div>
+                        <div class="label">Опубликовано</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="value">@(Model?.TotalStudents ?? 0)</div>
+                        <div class="label">Всего студентов</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="value">@(Model?.TotalTasks ?? 0)</div>
+                        <div class="label">Всего заданий</div>
+                    </div>
+                </div>
+
+                <div class="info-row">
+                    <div class="info-label">Последний вход</div>
+                    <div class="info-value">@(Model?.LastLogin?.ToString("dd.MM.yyyy HH:mm") ?? "—")</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="infoModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Редактировать профиль</h2>
+                <button class="modal-close" onclick="closeModal('infoModal')">&times;</button>
+            </div>
+
+            <form asp-action="UpdateProfile" method="post" id="profileForm">
+                <div class="form-group">
+                    <label class="form-label">Имя</label>
+                    <input type="text" name="FirstName" class="form-control" value="@Model?.Profile?.FirstName" />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Фамилия</label>
+                    <input type="text" name="LastName" class="form-control" value="@Model?.Profile?.LastName" />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">О себе</label>
+                    <textarea name="Bio" class="form-control" placeholder="Расскажите о себе...">@(Model?.Profile?.Bio ?? "Преподаватель платформы TeachCodIT")</textarea>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('infoModal')">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.classList.remove('active');
+            }
+        }
+
+        document.getElementById('profileForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+
+            fetch('@Url.Action("UpdateProfile", "Teacher")', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Профиль успешно обновлен');
+                    location.reload();
+                } else {
+                    alert('Ошибка при обновлении профиля');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Произошла ошибка');
+            });
+        });
+    </script>
+</body>
+</html>

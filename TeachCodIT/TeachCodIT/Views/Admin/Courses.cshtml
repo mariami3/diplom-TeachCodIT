@@ -1,0 +1,290 @@
+﻿@model List<TeachCodIT.Models.Course>
+@{
+    ViewData["Title"] = "Курсы - TeachCodIT";
+}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #2d3748;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+            .logo i {
+                color: #48bb78;
+            }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+            .nav-links a {
+                color: #4a5568;
+                text-decoration: none;
+                font-weight: 500;
+                transition: color 0.3s ease;
+                display: flex;
+                align-items: center;
+                gap: 0.3rem;
+            }
+
+                .nav-links a:hover,
+                .nav-links a.active {
+                    color: #48bb78;
+                }
+
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2d3748;
+        }
+
+        .create-btn {
+            padding: 0.8rem 1.5rem;
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+            .create-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(72, 187, 120, 0.3);
+            }
+
+        .courses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .course-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+        }
+
+            .course-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            }
+
+        .course-header {
+            height: 100px;
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            padding: 1rem;
+            color: white;
+            position: relative;
+        }
+
+        .course-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+
+        .course-status {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .status-published {
+            background: rgba(72, 187, 120, 0.9);
+            color: white;
+        }
+
+        .status-draft {
+            background: rgba(160, 174, 192, 0.9);
+            color: white;
+        }
+
+        .course-body {
+            padding: 1rem;
+        }
+
+        .course-description {
+            color: #718096;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 1rem;
+        }
+
+        .course-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: #718096;
+            margin-bottom: 1rem;
+        }
+
+        .course-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            padding: 1rem;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .action-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #718096;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+            .action-btn:hover {
+                background: #48bb78;
+                color: white;
+            }
+
+            .action-btn.delete:hover {
+                background: #ff5757;
+            }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            background: white;
+            border-radius: 15px;
+            color: #718096;
+            grid-column: 1 / -1;
+        }
+
+        @@media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="logo">
+            <i class="fas fa-book"></i> TeachCodIT Admin
+        </a>
+        <div class="nav-links">
+            <a href="@Url.Action("Index", "Admin")">Аналитика</a>
+            <a href="@Url.Action("Users", "Admin")">Пользователи</a>
+            <a href="@Url.Action("Roles", "Admin")">Роли</a>
+            <a href="@Url.Action("Courses", "Admin")" class="active">Курсы</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1 class="page-title">Управление курсами</h1>
+            <a href="@Url.Action("CreateCourse", "Admin")" class="create-btn">
+                <i class="fas fa-plus-circle"></i> Создать курс
+            </a>
+        </div>
+
+        @if (Model != null && Model.Any())
+        {
+            <div class="courses-grid">
+                @foreach (var course in Model)
+                {
+                    <div class="course-card">
+                        <div class="course-header" style="background: linear-gradient(135deg, @(course.GradientColor ?? "#48bb78, #38a169"));">
+                            <div class="course-title">@course.Title</div>
+                            <span class="course-status @(course.IsPublished == true ? "status-published" : "status-draft")">
+                                @(course.IsPublished == true ? "Опубликован" : "Черновик")
+                            </span>
+                        </div>
+                        <div class="course-body">
+                            <div class="course-description">
+                                @(course.Description?.Length > 100 ? course.Description.Substring(0, 100) + "..." : course.Description ?? "Нет описания")
+                            </div>
+                            <div class="course-meta">
+                                <span><i class="far fa-calendar-alt"></i> @course.CreatedAt?.ToString("dd.MM.yyyy")</span>
+                                <span><i class="fas fa-user"></i> ID: @course.CreatedBy</span>
+                            </div>
+                        </div>
+                        <div class="course-footer">
+                            <a href="@Url.Action("EditCourse", "Admin", new { id = course.IdCourse })" class="action-btn">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="@Url.Action("DeleteCourse", "Admin", new { id = course.IdCourse })" class="action-btn delete">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <i class="fas fa-book-open" style="font-size: 3rem; color: #e2e8f0; margin-bottom: 1rem;"></i>
+                <h3>Нет курсов</h3>
+                <p>Создайте первый курс</p>
+            </div>
+        }
+    </div>
+</body>
+</html>

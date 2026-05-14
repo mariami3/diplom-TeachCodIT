@@ -1,0 +1,495 @@
+﻿@model TeachCodIT.Models.ViewModels.LessonViewModel
+@{
+    ViewData["Title"] = $"{Model?.Title} - TeachCodIT";
+}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+
+        /* Navigation */
+        .navbar {
+            background: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #667eea;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+            .logo i {
+                color: #FFD700;
+            }
+
+        .main-container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #667eea;
+            text-decoration: none;
+            margin-bottom: 2rem;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+            .back-link:hover {
+                color: #5a67d8;
+                text-decoration: underline;
+            }
+
+        /* Две колонки */
+        .lesson-layout {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        /* Левая колонка - теория */
+        .theory-section {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .lesson-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 1rem;
+            line-height: 1.3;
+        }
+
+        .lesson-meta {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+            color: #718096;
+            font-size: 0.95rem;
+        }
+
+            .lesson-meta i {
+                margin-right: 0.5rem;
+                color: #667eea;
+            }
+
+        .lesson-content {
+            color: #2d3748;
+            line-height: 1.8;
+            margin-bottom: 2rem;
+            font-size: 1rem;
+        }
+
+            .lesson-content h1 {
+                font-size: 1.8rem;
+                margin: 1.5rem 0 1rem;
+                color: #2d3748;
+            }
+
+            .lesson-content h2 {
+                font-size: 1.5rem;
+                margin: 1.3rem 0 0.8rem;
+                color: #2d3748;
+            }
+
+            .lesson-content h3 {
+                font-size: 1.2rem;
+                margin: 1rem 0 0.5rem;
+                color: #2d3748;
+            }
+
+            .lesson-content p {
+                margin-bottom: 1rem;
+                line-height: 1.8;
+            }
+
+            .lesson-content ul, .lesson-content ol {
+                margin: 1rem 0;
+                padding-left: 2rem;
+            }
+
+            .lesson-content li {
+                margin-bottom: 0.5rem;
+            }
+
+            .lesson-content pre {
+                background: #1e1e1e;
+                color: #d4d4d4;
+                padding: 1rem;
+                border-radius: 10px;
+                overflow-x: auto;
+                margin: 1.5rem 0;
+                font-family: 'Courier New', monospace;
+                font-size: 0.9rem;
+            }
+
+            .lesson-content code {
+                font-family: 'Courier New', monospace;
+                background: #f7fafc;
+                padding: 0.2rem 0.4rem;
+                border-radius: 4px;
+                font-size: 0.9rem;
+            }
+
+            .lesson-content pre code {
+                background: none;
+                padding: 0;
+            }
+
+        .complete-btn {
+            padding: 0.8rem 2rem;
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+            .complete-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(72, 187, 120, 0.3);
+            }
+
+            .complete-btn:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+                transform: none;
+            }
+
+        .btn-wrapper {
+            text-align: right;
+            margin-top: 1rem;
+        }
+
+        /* Правая колонка - задания */
+        .tasks-section {
+            background: white;
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 100px;
+        }
+
+        .tasks-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid #667eea;
+            display: inline-block;
+        }
+
+        .tasks-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .task-card {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 1rem;
+            transition: all 0.3s ease;
+            border: 1px solid #e2e8f0;
+        }
+
+            .task-card:hover {
+                transform: translateX(4px);
+                border-color: #667eea;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            }
+
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .task-type {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .type-test {
+            background: rgba(72, 187, 120, 0.1);
+            color: #48bb78;
+        }
+
+        .type-code {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+        }
+
+        .task-title {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+            line-height: 1.4;
+        }
+
+        .task-xp {
+            font-size: 0.8rem;
+            color: #718096;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+            .task-xp i {
+                color: #FFD700;
+            }
+
+        .task-status {
+            font-size: 0.75rem;
+            margin-top: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .status-solved {
+            color: #48bb78;
+        }
+
+        .status-unsolved {
+            color: #ed8936;
+        }
+
+        .solve-btn {
+            width: 100%;
+            padding: 0.6rem;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+            .solve-btn:hover {
+                background: #5a67d8;
+                transform: translateY(-2px);
+            }
+
+        .empty-tasks {
+            text-align: center;
+            padding: 2rem;
+            color: #718096;
+        }
+
+            .empty-tasks i {
+                font-size: 3rem;
+                color: #e2e8f0;
+                margin-bottom: 1rem;
+            }
+
+        /* Адаптивность */
+        @@media (max-width: 1024px) {
+            .lesson-layout {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .tasks-section {
+                position: static;
+                top: auto;
+            }
+
+            .main-container {
+                padding: 0 1rem;
+            }
+        }
+
+        @@media (max-width: 768px) {
+            .navbar {
+                padding: 1rem;
+            }
+
+            .lesson-title {
+                font-size: 1.5rem;
+            }
+
+            .lesson-meta {
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+
+            .theory-section {
+                padding: 1.5rem;
+            }
+
+            .tasks-section {
+                padding: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <a href="/" class="logo">
+            <i class="fas fa-code"></i> TeachCodIT
+        </a>
+        <div class="nav-links" style="display: flex; gap: 1.5rem;">
+            <a href="@Url.Action("Home", "Student")" style="color: #4a5568; text-decoration: none;">Главная</a>
+            <a href="@Url.Action("MyCourses", "Student")" style="color: #4a5568; text-decoration: none;">Мои курсы</a>
+            <a href="@Url.Action("Achievements", "Student")" style="color: #4a5568; text-decoration: none;">Достижения</a>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <!-- Back Link -->
+        <a href="@Url.Action("Course", "Student", new { id = Model?.CourseId })" class="back-link">
+            <i class="fas fa-arrow-left"></i> Вернуться к курсу
+        </a>
+
+        <!-- Lesson Layout -->
+        <div class="lesson-layout">
+            <!-- Левая колонка - Теория -->
+            <div class="theory-section">
+                <h1 class="lesson-title">@Model?.Title</h1>
+
+                <div class="lesson-meta">
+                    <span><i class="fas fa-star"></i> @Model?.XPReward XP за прохождение</span>
+                    <span><i class="fas fa-tasks"></i> @Model?.Tasks?.Count заданий</span>
+                </div>
+
+                <div class="lesson-content">
+                    @Html.Raw(Model?.Content)
+                </div>
+
+                <div class="btn-wrapper">
+                    <form asp-action="CompleteLesson" method="post" style="display: inline;">
+                        <input type="hidden" name="lessonId" value="@Model?.IdLesson" />
+        
+                        @if (Model?.IsCompleted == true)
+                        {
+                            <button type="button" class="complete-btn" disabled style="background: #a0aec0;">
+                                <span><i class="fas fa-check-circle"></i> Урок пройден</span>
+                            </button>
+                        }
+                        else
+                        {
+                            <button type="submit" class="complete-btn">
+                                <span><i class="fas fa-check"></i> Отметить как пройденный</span>
+                            </button>
+                        }
+                        
+                    </form>
+                </div>
+            </div>
+
+            <!-- Правая колонка - Задания -->
+            <div class="tasks-section">
+                <h2 class="tasks-title">📝 Задания к уроку</h2>
+
+                @if (Model?.Tasks != null && Model.Tasks.Any())
+                {
+                    <div class="tasks-list">
+                        @foreach (var task in Model.Tasks)
+                        {
+                            <div class="task-card">
+                                <div class="task-header">
+                                    <span class="task-type @(task.TaskType == "test" ? "type-test" : "type-code")">
+                                        @(task.TaskType == "test" ? "📋 Тест" : "💻 Код")
+                                    </span>
+                                    <span class="task-xp">
+                                        <i class="fas fa-star"></i> @task.XPReward XP
+                                    </span>
+                                </div>
+                                <div class="task-title">@task.Title</div>
+                                <div class="task-status @(task.IsCompleted ? "status-solved" : "status-unsolved")">
+                                    @if (task.IsCompleted)
+                                    {
+                                        <span><i class="fas fa-check-circle"></i> Решено</span>
+                                    }
+                                    else
+                                    {
+                                        <span><i class="fas fa-hourglass-half"></i> Ожидает решения</span>
+                                    }
+                                </div>
+                                <a href="@Url.Action("Task", "Student", new { taskId = task.IdLessonTask })" class="solve-btn">
+                                    Решать
+                                </a>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="empty-tasks">
+                        <i class="fas fa-tasks"></i>
+                        <p>В этом уроке пока нет заданий</p>
+                        <p style="font-size: 0.85rem; margin-top: 0.5rem;">Задания появятся позже</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <script>
+        hljs.highlightAll();
+    </script>
+</body>
+</html>

@@ -1,0 +1,1427 @@
+﻿@{
+    ViewData["Title"] = "TeachCodIT - Платформа для обучения программированию";
+    var stats = (CourseCount: 3, StudentCount: 2, LessonCount: 3); // Это временно, пока не настроена передача данных
+}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            z-index: 0;
+        }
+
+        .animated-shape {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            filter: blur(60px);
+        }
+
+        .shape1 {
+            width: 400px;
+            height: 400px;
+            top: -100px;
+            right: -100px;
+            animation: float 20s infinite;
+        }
+
+        .shape2 {
+            width: 300px;
+            height: 300px;
+            bottom: -50px;
+            left: -50px;
+            animation: float 15s infinite reverse;
+        }
+
+        .shape3 {
+            width: 200px;
+            height: 200px;
+            bottom: 30%;
+            right: 15%;
+            animation: float 12s infinite;
+        }
+
+        @@keyframes float {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg);
+            }
+
+            33% {
+                transform: translateY(-30px) rotate(120deg);
+            }
+
+            66% {
+                transform: translateY(20px) rotate(240deg);
+            }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            color: white;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .badge {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            display: inline-block;
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            animation: slideDown 1s ease-out;
+        }
+
+        .hero-title {
+            font-size: 4.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+            text-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            animation: slideUp 1s ease-out 0.2s both;
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            margin-bottom: 2.5rem;
+            opacity: 0.9;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            animation: slideUp 1s ease-out 0.4s both;
+        }
+
+        .hero-highlight {
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+        }
+
+        /* Buttons */
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-bottom: 2rem;
+            animation: slideUp 1s ease-out 0.6s both;
+        }
+
+        .btn {
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: white;
+            color: #667eea;
+            border: none;
+        }
+
+            .btn-primary:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            }
+
+        .btn-outline {
+            background: transparent;
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+        }
+
+            .btn-outline:hover {
+                background: white;
+                color: #667eea;
+                border-color: white;
+                transform: translateY(-2px);
+            }
+
+        .btn-login {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.8);
+        }
+
+            .btn-login:hover {
+                background: white;
+                color: #667eea;
+                border-color: white;
+                transform: translateY(-2px);
+            }
+
+        /* Stats */
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin-bottom: 3rem;
+            animation: slideUp 1s ease-out 0.8s both;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Features */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 4rem;
+            animation: slideUp 1s ease-out 1s both;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+            .feature-card:hover {
+                transform: translateY(-5px);
+                background: rgba(255, 255, 255, 0.15);
+            }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            color: #FFD700;
+        }
+
+        .feature-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .feature-description {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        /* Additional Info Section */
+        .additional-info {
+            margin-top: 6rem;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            animation: slideUp 1s ease-out 1.2s both;
+        }
+
+        .info-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+            .info-card:hover {
+                background: rgba(255, 255, 255, 0.08);
+                transform: translateY(-5px);
+            }
+
+        .info-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #FFD700;
+        }
+
+        .info-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: white;
+        }
+
+        .info-text {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            line-height: 1.6;
+            color: white;
+        }
+
+        .info-highlight {
+            color: #FFD700;
+            font-weight: 700;
+            font-size: 1.2rem;
+            display: block;
+            margin-top: 0.5rem;
+        }
+
+        /* Testimonials Section */
+        .testimonials {
+            margin-top: 6rem;
+            animation: slideUp 1s ease-out 1.4s both;
+        }
+
+        .testimonials-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 3rem;
+            color: white;
+            text-align: center;
+        }
+
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+
+        .testimonial-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: left;
+            transition: all 0.3s ease;
+        }
+
+            .testimonial-card:hover {
+                transform: translateY(-5px);
+                background: rgba(255, 255, 255, 0.08);
+            }
+
+        .testimonial-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            margin-bottom: 1rem;
+            object-fit: cover;
+            border: 3px solid #FFD700;
+        }
+
+        .testimonial-text {
+            color: white;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+            font-style: italic;
+        }
+
+        .testimonial-author {
+            color: #FFD700;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .testimonial-role {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.8rem;
+        }
+
+        .testimonial-xp {
+            color: #FFD700;
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Code Editor Section */
+        .code-editor-section {
+            margin-top: 6rem;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            animation: slideUp 1s ease-out 1.5s both;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: white;
+        }
+
+        .section-subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+            color: white;
+        }
+
+        .code-editor {
+            background: #1e1e1e;
+            border-radius: 10px;
+            overflow: hidden;
+            text-align: left;
+        }
+
+        .code-header {
+            background: #333;
+            padding: 0.5rem 1rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .code-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ff5f56;
+        }
+
+            .code-dot:nth-child(2) {
+                background: #ffbd2e;
+            }
+
+            .code-dot:nth-child(3) {
+                background: #27c93f;
+            }
+
+        .code-content {
+            padding: 1rem;
+            color: #d4d4d4;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .code-line {
+            margin-bottom: 0.5rem;
+        }
+
+        .code-keyword {
+            color: #569cd6;
+        }
+
+        .code-string {
+            color: #ce9178;
+        }
+
+        .code-function {
+            color: #dcdcaa;
+        }
+
+        .code-comment {
+            color: #6a9955;
+        }
+
+        .code-output {
+            background: #2d2d2d;
+            padding: 1rem;
+            border-top: 1px solid #404040;
+        }
+
+        .test-cases {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .test-case {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            color: white;
+        }
+
+        /* Streak Section */
+        .streak-section {
+            margin-top: 6rem;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            animation: slideUp 1s ease-out 1.6s both;
+        }
+
+        .calendar-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+        }
+
+        .streak-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 0.5rem;
+        }
+
+        .streak-subtitle {
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 2rem;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8rem;
+        }
+
+            .calendar-day.active {
+                background: #FFD700;
+                color: #333;
+            }
+
+            .calendar-day.streak {
+                background: rgba(255, 215, 0, 0.3);
+                border: 1px solid #FFD700;
+            }
+
+        .streak-stats {
+            display: flex;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .streak-stat {
+            text-align: left;
+        }
+
+        .streak-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #FFD700;
+        }
+
+        .streak-label {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        .challenge-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+        }
+
+        .challenge-progress {
+            margin: 1.5rem 0;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 70%;
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            border-radius: 4px;
+        }
+
+        .freeze-badge {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            display: inline-block;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        /* Leaderboard Section */
+        .leaderboard-section {
+            margin-top: 6rem;
+            animation: slideUp 1s ease-out 1.7s both;
+        }
+
+        .leaderboard-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 1rem;
+        }
+
+        .leaderboard-subtitle {
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 2rem;
+        }
+
+        .leaderboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+        }
+
+        .leaderboard-list {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 1.5rem;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+            .leaderboard-item:last-child {
+                border-bottom: none;
+            }
+
+        .rank {
+            width: 30px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #FFD700;
+            font-weight: 700;
+        }
+
+            .rank.top-3 {
+                background: #FFD700;
+                color: #333;
+            }
+
+        .user-info {
+            flex: 1;
+            text-align: left;
+        }
+
+        .user-name {
+            color: white;
+            font-weight: 600;
+        }
+
+        .user-streak {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.8rem;
+        }
+
+        .user-xp {
+            color: #FFD700;
+            font-weight: 700;
+        }
+
+        .promo-zone {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .promo-title {
+            color: #FFD700;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        /* Certificate Section */
+        .certificate-section {
+            margin-top: 6rem;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 3rem;
+            animation: slideUp 1s ease-out 1.8s both;
+        }
+
+        .certificate-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: center;
+        }
+
+        .certificate-content {
+            text-align: left;
+        }
+
+        .certificate-badge {
+            background: rgba(255, 215, 0, 0.2);
+            border: 1px solid #FFD700;
+            color: #FFD700;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+
+        .certificate-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 1rem;
+        }
+
+        .certificate-text {
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+
+        .certificate-preview {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .preview-title {
+            color: #667eea;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .preview-subtitle {
+            color: #666;
+            margin-bottom: 2rem;
+        }
+
+        .preview-name {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #333;
+            margin: 1rem 0;
+        }
+
+        .preview-course {
+            background: #f0f0f0;
+            padding: 1rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+        }
+
+        .linkedin-btn {
+            background: #0077b5;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            margin-top: 6rem;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            padding: 3rem;
+            animation: slideUp 1s ease-out 1.9s both;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .cta-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: white;
+        }
+
+        .cta-subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+            color: white;
+        }
+
+        .cta-button {
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            color: #333;
+            border: none;
+            padding: 1rem 3rem;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+            .cta-button:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 10px 25px rgba(255, 215, 0, 0.3);
+            }
+
+        /* Footer */
+        .footer {
+            margin-top: 6rem;
+            padding: 3rem 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+            text-align: left;
+            animation: slideUp 1s ease-out 2s both;
+        }
+
+        .footer-column {
+            color: white;
+        }
+
+        .footer-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: #FFD700;
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+            .footer-links li {
+                margin-bottom: 0.5rem;
+            }
+
+            .footer-links a {
+                color: rgba(255, 255, 255, 0.7);
+                text-decoration: none;
+                transition: color 0.3s ease;
+            }
+
+                .footer-links a:hover {
+                    color: #FFD700;
+                }
+
+        .language-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .language-tag {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.25rem 0.75rem;
+            border-radius: 5px;
+            font-size: 0.8rem;
+        }
+
+        /* Animations */
+        @@keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @@keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Navigation */
+        .navbar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+            z-index: 10;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(45deg, #fff, #f0f0f0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+            .nav-links a {
+                color: white;
+                text-decoration: none;
+                font-weight: 500;
+                opacity: 0.9;
+                transition: opacity 0.3s ease;
+            }
+
+                .nav-links a:hover {
+                    opacity: 1;
+                }
+
+        /* Floating animation for elements */
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+
+        @@keyframes floating {
+            0%, 100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        /* Gradient text */
+        .gradient-text {
+            background: linear-gradient(45deg, #FFD700, #FFA500, #FF6B6B);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-size: 200% 200%;
+            animation: gradient 5s ease infinite;
+        }
+
+        @@keyframes gradient {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        /* Responsive */
+        @@media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1rem;
+            }
+
+            .button-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .stats {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+
+            .features {
+                grid-template-columns: 1fr;
+            }
+
+            .additional-info {
+                grid-template-columns: 1fr;
+                margin-top: 3rem;
+            }
+
+            .testimonials-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .streak-section {
+                grid-template-columns: 1fr;
+            }
+
+            .leaderboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .certificate-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .footer {
+                grid-template-columns: 1fr;
+            }
+
+            .cta-section {
+                padding: 2rem;
+            }
+
+            .navbar {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <section class="hero">
+        <div class="hero-background">
+            <div class="animated-shape shape1"></div>
+            <div class="animated-shape shape2"></div>
+            <div class="animated-shape shape3"></div>
+        </div>
+
+        <div class="hero-content">
+            <div class="badge">
+                <i class="fas fa-rocket" style="margin-right: 8px;"></i>
+                Новая платформа для обучения программированию
+            </div>
+
+            <h1 class="hero-title">
+                Учись программировать
+                <br />
+                <span class="gradient-text">в современном формате</span>
+            </h1>
+
+            <p class="hero-subtitle">
+                Интерактивные уроки, практические задания и gamification —
+                всё, чтобы сделать обучение программированию увлекательным и эффективным
+            </p>
+
+            <div class="button-group">
+                <a asp-controller="Account" asp-action="Register" class="btn btn-primary">
+                    <i class="fas fa-play"></i>
+                    Начать обучение
+                </a>
+                <a asp-controller="Account" asp-action="Authorization" class="btn btn-login">
+                    <i class="fas fa-sign-in-alt"></i>
+                    У меня уже есть аккаунт
+                </a>
+            </div>
+
+            <div class="stats">
+                <div class="stat-item floating">
+                    <span class="stat-number">@stats.CourseCount+</span>
+                    <span class="stat-label">Курсов</span>
+                </div>
+                <div class="stat-item floating" style="animation-delay: 0.5s;">
+                    <span class="stat-number">@stats.LessonCount+</span>
+                    <span class="stat-label">Уроков</span>
+                </div>
+                <div class="stat-item floating" style="animation-delay: 1s;">
+                    <span class="stat-number">@stats.StudentCount+</span>
+                    <span class="stat-label">Студентов</span>
+                </div>
+                <div class="stat-item floating" style="animation-delay: 1.5s;">
+                    <span class="stat-number">3.1M+</span>
+                    <span class="stat-label">Всего студентов</span>
+                </div>
+            </div>
+
+            <!-- Features Section -->
+            <div class="features">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-gamepad"></i>
+                    </div>
+                    <h3 class="feature-title">Геймификация</h3>
+                    <p class="feature-description">
+                        Зарабатывай XP, открывай достижения и соревнуйся с другими студентами
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-laptop-code"></i>
+                    </div>
+                    <h3 class="feature-title">Практические задания</h3>
+                    <p class="feature-description">
+                        Решай реальные задачи и получай мгновенную обратную связь
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3 class="feature-title">Отслеживание прогресса</h3>
+                    <p class="feature-description">
+                        Следи за своим ростом и получай персонализированные рекомендации
+                    </p>
+                </div>
+            </div>
+
+            <!-- Code Editor Section -->
+            <div class="code-editor-section">
+                <h2 class="section-title">Учитесь на практике</h2>
+                <p class="section-subtitle">
+                    Пишите настоящий код с первого дня. Наши короткие уроки дают мгновенную обратную связь, пока вы программируете!
+                </p>
+
+                <div class="code-editor">
+                    <div class="code-header">
+                        <span class="code-dot"></span>
+                        <span class="code-dot"></span>
+                        <span class="code-dot"></span>
+                    </div>
+                    <div class="code-content">
+                        <div class="code-line">
+                            <span class="code-keyword">const</span> greeting = <span class="code-string">"Hello, TeachCodIT!"</span>;
+                        </div>
+                        <div class="code-line">
+                            <span class="code-keyword">function</span> <span class="code-function">sayHi</span>(name) {
+                        </div>
+                        <div class="code-line">
+                            &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">return</span> greeting + <span class="code-string">" "</span> + name;
+                        </div>
+                        <div class="code-line">
+                            }
+                        </div>
+                    </div>
+                    <div class="code-output">
+                        <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                            <span style="background: #4CAF50; padding: 0.5rem 1rem; border-radius: 5px; cursor: pointer;">▶ Run Code</span>
+                            <span style="background: #404040; padding: 0.5rem 1rem; border-radius: 5px;">Ask AI</span>
+                        </div>
+                        <div class="test-cases">
+                            <div class="test-case">
+                                <div>Test #1</div>
+                                <small>INPUT: "Alex"</small>
+                            </div>
+                            <div class="test-case">
+                                <div>Test #2</div>
+                                <small>OUTPUT: "Hello, TeachCodIT! Alex"</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Streak Section -->
+            <div class="streak-section">
+                <div class="calendar-card">
+                    <h3 class="streak-title">12 дней подряд</h3>
+                    <p class="streak-subtitle">Возвращайтесь завтра, чтобы сохранить серию!</p>
+
+                    <div class="calendar-grid">
+                        @for (int i = 1; i <= 30; i++)
+                        {
+                            var dayClass = i <= 12 ? "active" : (i <= 15 ? "streak" : "");
+                            <div class="calendar-day @dayClass">@i</div>
+                        }
+                    </div>
+
+                    <div class="streak-stats">
+                        <div class="streak-stat">
+                            <div class="streak-number">12</div>
+                            <div class="streak-label">Дней подряд</div>
+                        </div>
+                        <div class="streak-stat">
+                            <div class="streak-number">2</div>
+                            <div class="streak-label">Заморозки</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="challenge-card">
+                    <h3 style="color: white; margin-bottom: 1rem;">Всё или ничего</h3>
+                    <div style="color: rgba(255,255,255,0.7);">День 5 из 7</div>
+
+                    <div class="challenge-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill"></div>
+                        </div>
+                    </div>
+
+                    <div class="freeze-badge">
+                        <i class="fas fa-snowflake"></i> Заморозка серии: 2 left
+                    </div>
+
+                    <p style="color: white; margin-top: 2rem;">
+                        <strong>Создайте свою серию кодирования</strong><br />
+                        Будьте последовательны и наблюдайте за своим прогрессом!
+                    </p>
+                </div>
+            </div>
+
+            <!-- Leaderboard Section -->
+            <div class="leaderboard-section">
+                <h2 class="leaderboard-title">ВЫ НЕ ОДИНОКИ В ЭТОМ</h2>
+                <p class="leaderboard-subtitle">
+                    Соревнуйтесь в глобальных рейтингах, приглашайте друзей, чтобы получать награды, и празднуйте успехи друг друга.
+                </p>
+
+                <div class="leaderboard-grid">
+                    <div class="leaderboard-list">
+                        <h3 style="color: #FFD700; margin-bottom: 1rem;">Лига Претендентов</h3>
+                        <div style="color: white; margin-bottom: 1rem;">Топ 7 продвигаются</div>
+
+                        <div class="leaderboard-item">
+                            <div class="rank top-3">1</div>
+                            <img src="https://i.pravatar.cc/40?img=1" class="testimonial-avatar" style="width: 40px; height: 40px; margin: 0;" />
+                            <div class="user-info">
+                                <div class="user-name">Алексей</div>
+                                <div class="user-streak">7+ Days</div>
+                            </div>
+                            <div class="user-xp">2840 XP</div>
+                        </div>
+
+                        <div class="leaderboard-item">
+                            <div class="rank top-3">2</div>
+                            <img src="https://i.pravatar.cc/40?img=2" class="testimonial-avatar" style="width: 40px; height: 40px; margin: 0;" />
+                            <div class="user-info">
+                                <div class="user-name">Михаил</div>
+                                <div class="user-streak">7+ Days</div>
+                            </div>
+                            <div class="user-xp">2650 XP</div>
+                        </div>
+
+                        <div class="leaderboard-item">
+                            <div class="rank top-3">3</div>
+                            <img src="https://i.pravatar.cc/40?img=3" class="testimonial-avatar" style="width: 40px; height: 40px; margin: 0;" />
+                            <div class="user-info">
+                                <div class="user-name">Николай</div>
+                                <div class="user-streak">7+ Days</div>
+                            </div>
+                            <div class="user-xp">2420 XP</div>
+                        </div>
+
+                        <div class="leaderboard-item">
+                            <div class="rank">4</div>
+                            <img src="https://i.pravatar.cc/40?img=4" class="testimonial-avatar" style="width: 40px; height: 40px; margin: 0;" />
+                            <div class="user-info">
+                                <div class="user-name">Екатерина</div>
+                                <div class="user-streak">7+ Days</div>
+                            </div>
+                            <div class="user-xp">2180 XP</div>
+                        </div>
+
+                        <div class="leaderboard-item">
+                            <div class="rank">5</div>
+                            <img src="https://i.pravatar.cc/40?img=5" class="testimonial-avatar" style="width: 40px; height: 40px; margin: 0;" />
+                            <div class="user-info">
+                                <div class="user-name">Алиса</div>
+                                <div class="user-streak">7+ Days</div>
+                            </div>
+                            <div class="user-xp">1950 XP</div>
+                        </div>
+                    </div>
+
+                    <div class="promo-zone">
+                        <div class="promo-title">Зона продвижения</div>
+                        <p style="color: white;">Попадите в топ-3 и получите особые награды!</p>
+                        <div style="margin-top: 2rem;">
+                            <i class="fas fa-trophy" style="font-size: 3rem; color: #FFD700;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Certificate Section -->
+            <div class="certificate-section">
+                <div class="certificate-grid">
+                    <div class="certificate-content">
+                        <div class="certificate-badge">СЕРТИФИКАТ О ПРОХОЖДЕНИИ</div>
+                        <h2 class="certificate-title">Докажите свои навыки</h2>
+                        <p class="certificate-text">
+                            Получайте сертификаты за каждый завершенный курс.
+                            Добавьте их в свой профиль LinkedIn и резюме, чтобы продемонстрировать работодателям свои навыки программирования.
+                        </p>
+                    </div>
+
+                    <div class="certificate-preview">
+                        <div class="preview-title">TeachCodIT</div>
+                        <div class="preview-subtitle">Настоящим подтверждается, что</div>
+                        <div class="preview-name">John Doe</div>
+                        <div class="preview-subtitle">успешно завершил(а)</div>
+                        <div class="preview-course">
+                            <strong>Python Fundamentals</strong><br />
+                            Дата: @DateTime.Now.ToString("MMM yyyy")
+                        </div>
+                        <button class="linkedin-btn">
+                            <i class="fab fa-linkedin"></i> Добавить в LinkedIn
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Testimonials Section с реальными аватарками -->
+            <div class="testimonials">
+                <h2 class="testimonials-title">Что говорят наши студенты</h2>
+                <div class="testimonials-grid">
+                    <div class="testimonial-card">
+                        <img src="https://i.pravatar.cc/60?img=7" class="testimonial-avatar" />
+                        <div class="testimonial-text">
+                            "Отличная платформа! Начал с нуля, а сейчас уже пишу свои первые проекты на C#."
+                        </div>
+                        <div class="testimonial-author">Алексей Петров</div>
+                        <div class="testimonial-role">Студент, 2 месяца</div>
+                        <div class="testimonial-xp">⭐ 2840 XP</div>
+                    </div>
+
+                    <div class="testimonial-card">
+                        <img src="https://i.pravatar.cc/60?img=8" class="testimonial-avatar" />
+                        <div class="testimonial-text">
+                            "Очень нравится система достижений и ежедневные задания. Мотивирует не пропускать занятия!"
+                        </div>
+                        <div class="testimonial-author">Мария Иванова</div>
+                        <div class="testimonial-role">Студентка, 3 месяца</div>
+                        <div class="testimonial-xp">⭐ 3120 XP</div>
+                    </div>
+
+                    <div class="testimonial-card">
+                        <img src="https://i.pravatar.cc/60?img=9" class="testimonial-avatar" />
+                        <div class="testimonial-text">
+                            "Лучшее соотношение цены и качества. Много практики и реальных проектов."
+                        </div>
+                        <div class="testimonial-author">Дмитрий Соколов</div>
+                        <div class="testimonial-role">Студент, 6 месяцев</div>
+                        <div class="testimonial-xp">⭐ 4560 XP</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CTA Section -->
+            <div class="cta-section">
+                <h2 class="cta-title">Готовы начать свой путь в IT?</h2>
+                <p class="cta-subtitle">
+                    Присоединяйтесь к более чем 3.1 миллиона студентов, которые уже выбрали TeachCodIT
+                </p>
+                <a asp-controller="Account" asp-action="Register" class="btn btn-primary">
+                    <i class="fas fa-rocket" style="margin-right: 10px;"></i>
+                    Начать 
+                </a>
+            </div>
+
+            <!-- Footer -->
+            <footer class="footer">
+                <div class="footer-column">
+                    <h3 class="footer-title">Компания</h3>
+                    <ul class="footer-links">
+                        <li><a asp-controller="Home" asp-action="Index">Главная</a></li>
+                        <li><a asp-controller="Home" asp-action="Privacy">О нас</a></li>
+                        <li><a href="#">Партнерская программа</a></li>
+                        <li><a href="#">Бизнес</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-column">
+                    <h3 class="footer-title">Ресурсы</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Блог</a></li>
+                        <li><a href="#">Справочник</a></li>
+                        <li><a href="#">ИИ-ассистент</a></li>
+                        <li><a href="#">FAQ</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-column">
+                    <h3 class="footer-title">Языки</h3>
+                    <div class="language-tags">
+                        <span class="language-tag">Python</span>
+                        <span class="language-tag">C++</span>
+                        <span class="language-tag">JavaScript</span>
+                        <span class="language-tag">Java</span>
+                        <span class="language-tag">C#</span>
+                        <span class="language-tag">SQL</span>
+                        <span class="language-tag">HTML/CSS</span>
+                    </div>
+                </div>
+
+                <div class="footer-column">
+                    <h3 class="footer-title">Темы</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Наука о данных</a></li>
+                        <li><a href="#">Веб-разработка</a></li>
+                        <li><a href="#">Искусственный интеллект</a></li>
+                        <li><a href="#">Алгоритмы</a></li>
+                        <li><a href="#">Аналитика данных</a></li>
+                    </ul>
+                </div>
+            </footer>
+        </div>
+    </section>
+</body>
+</html>

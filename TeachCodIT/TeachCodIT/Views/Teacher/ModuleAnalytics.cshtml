@@ -1,0 +1,683 @@
+﻿@model TeachCodIT.Models.ViewModels.ModuleAnalyticsViewModel
+@{
+    ViewData["Title"] = $"Аналитика модуля - {Model.ModuleTitle}";
+}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+
+        /* Navigation */
+        .navbar {
+            background: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #48bb78;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+            .logo i {
+                color: #FFD700;
+            }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+            .nav-links a {
+                color: #4a5568;
+                text-decoration: none;
+                font-weight: 500;
+                transition: color 0.3s ease;
+                display: flex;
+                align-items: center;
+                gap: 0.3rem;
+            }
+
+                .nav-links a:hover,
+                .nav-links a.active {
+                    color: #48bb78;
+                }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .nav-notification {
+            position: relative;
+            cursor: pointer;
+        }
+
+            .nav-notification i {
+                font-size: 1.3rem;
+                color: #4a5568;
+            }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ff5757;
+            color: white;
+            font-size: 0.7rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 10px;
+        }
+
+        .nav-profile {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            cursor: pointer;
+            padding: 0.3rem 0.8rem;
+            border-radius: 10px;
+            transition: background 0.3s ease;
+            position: relative;
+        }
+
+            .nav-profile:hover {
+                background: #f7fafc;
+            }
+
+        .profile-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .profile-info {
+            display: none;
+        }
+
+        @@media (min-width: 768px) {
+            .profile-info {
+                display: block;
+            }
+        }
+
+        .profile-name {
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 0.95rem;
+        }
+
+        .profile-role {
+            font-size: 0.8rem;
+            color: #718096;
+        }
+
+        /* Profile Dropdown */
+        .profile-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            padding: 0.5rem 0;
+            min-width: 200px;
+            display: none;
+            margin-top: 0.5rem;
+        }
+
+        .nav-profile:hover .profile-dropdown {
+            display: block;
+        }
+
+        .dropdown-item {
+            padding: 0.7rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #4a5568;
+            text-decoration: none;
+            transition: background 0.3s ease;
+        }
+
+            .dropdown-item:hover {
+                background: #f7fafc;
+                color: #48bb78;
+            }
+
+            .dropdown-item i {
+                width: 20px;
+                color: #718096;
+            }
+
+        .dropdown-divider {
+            height: 1px;
+            background: #e2e8f0;
+            margin: 0.5rem 0;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        /* Back Button */
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1.2rem;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            text-decoration: none;
+            color: #4a5568;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+            .back-btn:hover {
+                background: #48bb78;
+                color: white;
+                border-color: #48bb78;
+                transform: translateX(-3px);
+            }
+
+        /* Header */
+        .analytics-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .analytics-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin: 0;
+        }
+
+        .module-badge {
+            background: #48bb78;
+            color: white;
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: transform 0.3s ease;
+        }
+
+            .stat-card:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            }
+
+        .stat-icon {
+            width: 45px;
+            height: 45px;
+            background: rgba(72, 187, 120, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #48bb78;
+            font-size: 1.3rem;
+        }
+
+        .stat-content {
+            flex: 1;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2d3748;
+        }
+
+        .stat-label {
+            color: #718096;
+            font-size: 0.85rem;
+        }
+
+        /* Main Card */
+        .analytics-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+            .card-header h3 {
+                font-size: 1.3rem;
+                font-weight: 600;
+                color: #2d3748;
+                margin: 0;
+            }
+
+        .export-btn {
+            padding: 0.5rem 1rem;
+            background: #48bb78;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+            .export-btn:hover {
+                background: #38a169;
+                transform: translateY(-2px);
+            }
+
+        /* Table */
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 12px;
+        }
+
+        .analytics-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+            .analytics-table th {
+                padding: 1rem;
+                text-align: left;
+                background: #f8fafc;
+                color: #2d3748;
+                font-weight: 600;
+                border-bottom: 2px solid #e2e8f0;
+                position: sticky;
+                top: 0;
+            }
+
+                .analytics-table th:not(:first-child) {
+                    text-align: center;
+                }
+
+            .analytics-table td {
+                padding: 1rem;
+                border-bottom: 1px solid #e2e8f0;
+                transition: background 0.3s ease;
+            }
+
+                .analytics-table td:first-child {
+                    font-weight: 600;
+                    color: #2d3748;
+                }
+
+                .analytics-table td:not(:first-child) {
+                    text-align: center;
+                }
+
+            .analytics-table tr:hover td {
+                background: #f8fafc;
+            }
+
+        /* Task Cell Styles */
+        .task-cell-correct {
+            color: #48bb78;
+            font-weight: 500;
+        }
+
+        .task-cell-incorrect {
+            color: #ff5757;
+        }
+
+        .task-cell-pending {
+            color: #94a3b8;
+        }
+
+        .task-cell-xp {
+            font-size: 0.75rem;
+            color: #48bb78;
+            margin-left: 0.25rem;
+        }
+
+        .total-xp {
+            font-weight: 700;
+            color: #48bb78;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #718096;
+        }
+
+            .empty-state i {
+                font-size: 3rem;
+                color: #e2e8f0;
+                margin-bottom: 1rem;
+            }
+
+        /* Tooltip */
+        .task-title-cell {
+            position: relative;
+            cursor: help;
+        }
+
+        /* Responsive */
+        @@media (max-width: 1024px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @@media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+                margin: 1rem auto;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .analytics-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .analytics-table {
+                font-size: 0.8rem;
+            }
+
+                .analytics-table th,
+                .analytics-table td {
+                    padding: 0.6rem;
+                }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="/" class="logo">
+                <i class="fas fa-chalkboard-teacher"></i>
+                TeachCodIT
+            </a>
+            <div class="nav-links">
+                <a href="@Url.Action("Dashboard", "Teacher")">
+                    <i class="fas fa-home"></i> Главная
+                </a>
+                <a href="@Url.Action("Dashboard", "Teacher")">
+                    <i class="fas fa-book"></i> Курсы
+                </a>
+                <a href="@Url.Action("Students", "Teacher")">
+                    <i class="fas fa-users"></i> Студенты
+                </a>
+                <a href="@Url.Action("Analytics", "Teacher")">
+                    <i class="fas fa-chart-bar"></i> Аналитика
+                </a>
+            </div>
+        </div>
+
+
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Header -->
+        <div class="analytics-header">
+            <a href="@Url.Action("Modules", "Teacher")" class="back-btn">
+                <i class="fas fa-arrow-left"></i> Назад 
+            </a>
+            <h1 class="analytics-title">Аналитика модуля</h1>
+            <span class="module-badge">@Model.ModuleTitle</span>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">@(Model.Students?.Count ?? 0)</div>
+                    <div class="stat-label">Всего студентов</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-tasks"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">@(Model.Students?.FirstOrDefault()?.Tasks?.Count ?? 0)</div>
+                    <div class="stat-label">Заданий в модуле</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-star"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">
+                        @{
+                            var totalXp = 0;
+                            if (Model.Students != null)
+                            {
+                                totalXp = Model.Students.Sum(s => s.TotalXP);
+                            }
+                        }
+                        @totalXp
+                    </div>
+                    <div class="stat-label">Всего XP</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">
+                        @{
+                            var avgScore = 0;
+                            if (Model.Students != null && Model.Students.Any())
+                            {
+                                var totalTasks = Model.Students.Sum(s => s.Tasks.Count);
+                                var completedTasks = Model.Students.Sum(s => s.Tasks.Count(t => t.IsCorrect == true));
+                                avgScore = totalTasks > 0 ? (completedTasks * 100 / totalTasks) : 0;
+                            }
+                        }
+                        @avgScore%
+                    </div>
+                    <div class="stat-label">Успеваемость</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Table -->
+        <div class="analytics-card">
+            <div class="card-header">
+                <h3>
+                    <i class="fas fa-chart-line"></i> Результаты студентов по заданиям модуля
+                </h3>
+
+                    <a href="@Url.Action("ExportModuleAnalyticsToExcel", "Teacher", new { moduleId = Model.ModuleId })"
+                       class="export-btn">
+                        <i class="fas fa-file-excel"></i> Экспорт в Excel
+                    </a>
+
+            </div>
+
+            @if (Model.Students == null || !Model.Students.Any())
+            {
+                <div class="empty-state">
+                    <i class="fas fa-inbox"></i>
+                    <p>В модуле пока нет студентов или заданий.</p>
+                </div>
+            }
+            else
+            {
+                <div class="table-wrapper">
+                    <table class="analytics-table">
+                        <thead>
+                            <tr>
+                                <th>Студент</th>
+                                <th>Общий XP</th>
+                                @if (Model.Students.Any() && Model.Students.First().Tasks != null && Model.Students.First().Tasks.Any())
+                                {
+                                    @foreach (var task in Model.Students.First().Tasks)
+                                    {
+                                        var title = task.TaskTitle ?? "";
+
+                                        <th class="task-title-cell" title="@title">
+                                            @(title.Length > 15 ? title.Substring(0, 15) + "..." : title)
+                                        </th>
+                                    }
+                                }
+                        </thead>
+                        <tbody>
+                            @foreach (var student in Model.Students)
+                            {
+                                <tr>
+                                    <td>
+                                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                            <div style="width: 32px; height: 32px; background: linear-gradient(135deg, #48bb78, #38a169); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;">
+                                                @(student.FullName?.Substring(0, 1) ?? "С")
+                                            </div>
+                                            <span>@student.FullName</span>
+                                        </div>
+                                    </td>
+                                    <td class="total-xp">@student.TotalXP XP</td>
+                                    @foreach (var task in student.Tasks ?? new List<TeachCodIT.Models.ViewModels.TaskResultViewModel>())
+                                    {
+                                        <td>
+                                            @if (task.IsCorrect == true)
+                                            {
+                                                <span style="color: #48bb78; font-size: 1.1rem;">
+                                                    <i class="fas fa-check-circle"></i>
+                                                </span>
+                                                <span class="task-cell-xp">@task.EarnedXP</span>
+                                            }
+                                            else if (task.IsCorrect == false)
+                                            {
+                                                <span style="color: #ff5757; font-size: 1.1rem;">
+                                                    <i class="fas fa-times-circle"></i>
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span style="color: #94a3b8;">
+                                                    <i class="fas fa-clock"></i>
+                                                </span>
+                                            }
+                                        </td>
+                                    }
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+
+    <script>
+        function exportTableToCSV() {
+            const rows = document.querySelectorAll('.analytics-table tr');
+            const csv = [];
+
+            for (let i = 0; i < rows.length; i++) {
+                const row = [];
+                const cols = rows[i].querySelectorAll('td, th');
+
+                for (let j = 0; j < cols.length; j++) {
+                    let text = cols[j].innerText.replace(/\s+/g, ' ').trim();
+                    row.push('"' + text + '"');
+                }
+
+                csv.push(row.join(','));
+            }
+
+            const blob = new Blob([csv.join('\n')], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'module_analytics.csv';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,662 @@
+﻿@model List<TeachCodIT.Models.ViewModels.LeaderboardEntry>
+@{
+    ViewData["Title"] = "Таблица лидеров - TeachCodIT";
+    var selectedPeriod = ViewBag.SelectedPeriod as string ?? "all";
+    var selectedSort = ViewBag.SelectedSort as string ?? "xp";
+}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #667eea;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo i {
+            color: #FFD700;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .nav-links a {
+            color: #4a5568;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: #667eea;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 0.5rem 1.5rem;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-bottom: none;
+            border-radius: 10px 10px 0 0;
+            color: #4a5568;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .tab:hover,
+        .tab.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .tab i {
+            margin-right: 0.5rem;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2d3748;
+        }
+
+        /* Фильтры */
+        .filter-section {
+            background: white;
+            border-radius: 15px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #4a5568;
+        }
+
+        .filter-select {
+            padding: 0.5rem 2rem 0.5rem 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background: white;
+            font-size: 0.9rem;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%234a5568' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.5rem center;
+            transition: all 0.3s ease;
+        }
+
+        .filter-select:hover {
+            border-color: #667eea;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+
+        .reset-btn {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+
+        .reset-btn:hover {
+            background: #cbd5e0;
+            transform: translateY(-2px);
+        }
+
+        .leaderboard-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .leaderboard-header {
+            display: grid;
+            grid-template-columns: 80px 1fr 120px 100px;
+            padding: 1rem 1.5rem;
+            background: #f7fafc;
+            font-weight: 600;
+            color: #2d3748;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .leaderboard-item {
+            display: grid;
+            grid-template-columns: 80px 1fr 120px 100px;
+            padding: 1rem 1.5rem;
+            align-items: center;
+            border-bottom: 1px solid #e2e8f0;
+            transition: background 0.3s ease;
+        }
+
+        .leaderboard-item:hover {
+            background: #f7fafc;
+        }
+
+        .leaderboard-item.current-user {
+            background: rgba(102, 126, 234, 0.05);
+            border-left: 4px solid #667eea;
+        }
+
+        .rank {
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .rank-1 {
+            color: #FFD700;
+        }
+
+        .rank-2 {
+            color: #C0C0C0;
+        }
+
+        .rank-3 {
+            color: #CD7F32;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .xp-value {
+            font-weight: 600;
+            color: #FFD700;
+        }
+
+        .streak-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            background: #ff5757;
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 5px;
+            font-size: 0.85rem;
+        }
+
+        .podium {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            align-items: flex-end;
+        }
+
+        .podium-item {
+            text-align: center;
+            padding: 1.5rem;
+            border-radius: 15px;
+        }
+
+        .podium-item.first {
+            background: linear-gradient(135deg, #FFD700, #FDB931);
+            color: #1a1a2e;
+        }
+
+        .podium-item.second {
+            background: linear-gradient(135deg, #C0C0C0, #A0A0A0);
+            color: white;
+        }
+
+        .podium-item.third {
+            background: linear-gradient(135deg, #CD7F32, #B87333);
+            color: white;
+        }
+
+        .podium-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 2rem;
+            font-weight: 700;
+            border: 3px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .podium-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+
+        .podium-xp {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .podium-stats {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        /* Блок текущей позиции пользователя */
+        .current-rank-card {
+            margin-top: 1.5rem;
+            margin-bottom: 1.5rem;
+            padding: 1rem 1.5rem;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.08), rgba(118, 75, 162, 0.08));
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .current-rank-card:hover {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.12), rgba(118, 75, 162, 0.12));
+        }
+
+        .current-rank-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .current-rank-icon {
+            width: 40px;
+            height: 40px;
+            background: #667eea;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .current-rank-text {
+            font-size: 1rem;
+            color: #2d3748;
+        }
+
+        .current-rank-text strong {
+            color: #667eea;
+            font-size: 1.2rem;
+        }
+
+        .current-rank-badge {
+            background: #667eea;
+            color: white;
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            background: white;
+            border-radius: 15px;
+            color: #718096;
+        }
+
+        /* Responsive */
+        @@media (max-width: 768px) {
+            .leaderboard-header,
+            .leaderboard-item {
+                grid-template-columns: 60px 1fr 80px 70px;
+                padding: 0.8rem;
+                font-size: 0.85rem;
+            }
+
+            .current-rank-card {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .current-rank-info {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .podium {
+                gap: 0.8rem;
+            }
+
+            .podium-item {
+                padding: 1rem;
+            }
+
+            .podium-avatar {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5rem;
+            }
+
+            .podium-name {
+                font-size: 1rem;
+            }
+
+            .filter-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filter-group {
+                justify-content: space-between;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="logo">
+            <i class="fas fa-code"></i> TeachCodIT
+        </a>
+        <div class="nav-links">
+            <a href="@Url.Action("Home", "Student")">Главная</a>
+            <a href="@Url.Action("MyCourses", "Student")">Мои курсы</a>
+            <a href="@Url.Action("Achievements", "Student")">Достижения</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="tabs">
+            <a href="@Url.Action("Home", "Student")" class="tab">
+                <i class="fas fa-home"></i> Главная
+            </a>
+            <a href="@Url.Action("MyCourses", "Student")" class="tab">
+                <i class="fas fa-graduation-cap"></i> Мои курсы
+            </a>
+            <a href="@Url.Action("Leaderboard", "Student")" class="tab active">
+                <i class="fas fa-trophy"></i> Лидерборд
+            </a>
+        </div>
+
+        <div class="page-header">
+            <h1 class="page-title">Таблица лидеров</h1>
+        </div>
+
+        <!-- Фильтры -->
+        <div class="filter-section">
+            <form method="get" class="filter-group" style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                <div class="filter-group">
+                    <span class="filter-label"><i class="fas fa-calendar-alt"></i> Период:</span>
+                    <select name="period" class="filter-select">
+                        <option value="all" selected="@(selectedPeriod == "all")">За всё время</option>
+                        <option value="week" selected="@(selectedPeriod == "week")">За неделю</option>
+                        <option value="month" selected="@(selectedPeriod == "month")">За месяц</option>
+                        <option value="year" selected="@(selectedPeriod == "year")">За год</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <span class="filter-label"><i class="fas fa-sort-amount-down"></i> Сортировка:</span>
+                    <select name="sort" class="filter-select">
+                        <option value="xp" selected="@(selectedSort == "xp")">По XP</option>
+                        <option value="streak" selected="@(selectedSort == "streak")">По серии</option>
+                        <option value="level" selected="@(selectedSort == "level")">По уровню</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="filter-btn">
+                    <i class="fas fa-search"></i> Применить
+                </button>
+                <a href="@Url.Action("Leaderboard", "Student")" class="filter-btn reset-btn">
+                    <i class="fas fa-undo-alt"></i> Сбросить
+                </a>
+            </form>
+        </div>
+
+        @if (Model != null && Model.Any())
+        {
+            <!-- Блок текущей позиции пользователя -->
+            @if (ViewBag.CurrentUserRank != null)
+            {
+                <div class="current-rank-card">
+                    <div class="current-rank-info">
+                        <div class="current-rank-icon">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="current-rank-text">
+                            📍 <strong>Ваша позиция в рейтинге:</strong> 
+                            <span style="font-size: 1.5rem; font-weight: 700; color: #667eea;">#@ViewBag.CurrentUserRank</span>
+                        </div>
+                    </div>
+                    <div class="current-rank-badge">
+                        @if (ViewBag.CurrentUserRank == 1)
+                        {
+                            <span>👑 Чемпион!</span>
+                        }
+                        else if (ViewBag.CurrentUserRank <= 3)
+                        {
+                            <span>🏆 В топ-3!</span>
+                        }
+                        else if (ViewBag.CurrentUserRank <= 10)
+                        {
+                            <span>⭐ В топ-10</span>
+                        }
+                        else
+                        {
+                            <span>📈 Продолжайте расти!</span>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- Пьедестал для топ-3 -->
+            @if (Model.Count >= 3 && selectedPeriod == "all")
+            {
+                <div class="podium">
+                    <div class="podium-item second">
+                        <div class="podium-avatar">@(Model[1].FullName?.Substring(0, 1) ?? "2")</div>
+                        <div class="podium-name">@Model[1].FullName</div>
+                        <div class="podium-xp"><i class="fas fa-star"></i> @Model[1].XP XP</div>
+                        <div class="podium-stats">🔥 @Model[1].StreakDays дней</div>
+                    </div>
+                    <div class="podium-item first">
+                        <div class="podium-avatar">@(Model[0].FullName?.Substring(0, 1) ?? "1")</div>
+                        <div class="podium-name">@Model[0].FullName</div>
+                        <div class="podium-xp"><i class="fas fa-star"></i> @Model[0].XP XP</div>
+                        <div class="podium-stats">🔥 @Model[0].StreakDays дней</div>
+                    </div>
+                    <div class="podium-item third">
+                        <div class="podium-avatar">@(Model[2].FullName?.Substring(0, 1) ?? "3")</div>
+                        <div class="podium-name">@Model[2].FullName</div>
+                        <div class="podium-xp"><i class="fas fa-star"></i> @Model[2].XP XP</div>
+                        <div class="podium-stats">🔥 @Model[2].StreakDays дней</div>
+                    </div>
+                </div>
+            }
+
+            <!-- Полная таблица -->
+            <div class="leaderboard-card">
+                <div class="leaderboard-header">
+                    <div>Место</div>
+                    <div>Студент</div>
+                    <div>@(selectedSort == "xp" ? "XP" : selectedSort == "streak" ? "Серия" : "Уровень")</div>
+                    <div>Дополнительно</div>
+                </div>
+
+                @foreach (var entry in Model)
+                {
+                    <div class="leaderboard-item @(entry.IsCurrentUser ? "current-user" : "")">
+                        <div class="rank @(entry.Rank == 1 ? "rank-1" : entry.Rank == 2 ? "rank-2" : entry.Rank == 3 ? "rank-3" : "")">
+                            @if (entry.Rank == 1)
+                            {
+                                <i class="fas fa-crown"></i>
+                            }
+                            else
+                            {
+                                @entry.Rank
+                            }
+                        </div>
+                        <div class="user-info">
+                            <div class="user-avatar">
+                                @(
+                                    !string.IsNullOrWhiteSpace(entry.FullName)
+                                    ? entry.FullName.Trim().Substring(0, 1)
+                                    : entry.UserName?.Substring(0, 1) ?? "?"
+                                 )
+                            </div>
+                            <span class="user-name">@(entry.FullName ?? entry.UserName)</span>
+                        </div>
+                        <div class="xp-value">
+                            @if (selectedSort == "xp")
+                            {
+                                <i class="fas fa-star"></i> @entry.XP
+                            }
+                            else if (selectedSort == "streak")
+                            {
+                                <i class="fas fa-fire"></i> @entry.StreakDays
+                            }
+                            else
+                            {
+                                <i class="fas fa-level-up-alt"></i> @entry.Level
+                            }
+                        </div>
+                        <div>
+                            @if (selectedSort == "xp")
+                            {
+                                <span class="streak-badge">
+                                    <i class="fas fa-fire"></i> @entry.StreakDays
+                                </span>
+                            }
+                            else if (selectedSort == "streak")
+                            {
+                                <span class="streak-badge" style="background: #FFD700; color: #1a1a2e;">
+                                    <i class="fas fa-star"></i> @entry.XP XP
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="streak-badge">
+                                    <i class="fas fa-star"></i> @entry.XP XP
+                                </span>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Информация о количестве участников -->
+            <div style="margin-top: 1rem; text-align: center; color: #718096; font-size: 0.9rem;">
+                <i class="fas fa-users"></i> Всего участников: @Model.Count
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <i class="fas fa-trophy" style="font-size: 3rem; color: #e2e8f0; margin-bottom: 1rem;"></i>
+                <h3>Пока нет данных</h3>
+                <p>Наберите 100 XP, чтобы попасть в таблицу лидеров</p>
+            </div>
+        }
+    </div>
+</body>
+</html>

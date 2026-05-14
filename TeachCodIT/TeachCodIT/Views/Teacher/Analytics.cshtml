@@ -1,0 +1,503 @@
+﻿@model TeachCodIT.Models.ViewModels.TeacherAnalyticsViewModel
+@{
+    ViewData["Title"] = "Аналитика курса - TeachCodIT";
+    int courseId = ViewBag.CourseId;
+    string courseTitle = ViewBag.CourseTitle;
+}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #48bb78;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+            .logo i {
+                color: #FFD700;
+            }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .page-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .back-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #4a5568;
+            text-decoration: none;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+            .back-btn:hover {
+                background: #48bb78;
+                color: white;
+                transform: translateX(-3px);
+            }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2d3748;
+        }
+
+        .course-badge {
+            background: #48bb78;
+            color: white;
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(72, 187, 120, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #48bb78;
+            font-size: 1.5rem;
+        }
+
+        .stat-content {
+            flex: 1;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #2d3748;
+        }
+
+        .stat-label {
+            color: #718096;
+            font-size: 0.9rem;
+        }
+
+        /* Charts Grid */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .chart-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 1rem;
+        }
+
+        .chart-container {
+            height: 300px;
+            position: relative;
+        }
+
+        /* Tables */
+        .students-table {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 2rem;
+        }
+
+        .table-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 1rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 1rem;
+            background: #f7fafc;
+            color: #2d3748;
+            font-weight: 600;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: #f7fafc;
+        }
+
+        .rank {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        .rank-1 {
+            background: #FFD700;
+            color: #1a1a2e;
+        }
+
+        .rank-2 {
+            background: #C0C0C0;
+            color: #1a1a2e;
+        }
+
+        .rank-3 {
+            background: #CD7F32;
+            color: white;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #48bb78, #38a169);
+            border-radius: 4px;
+        }
+
+        .status-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-good {
+            background: rgba(72, 187, 120, 0.1);
+            color: #48bb78;
+        }
+
+        .status-warning {
+            background: rgba(237, 137, 54, 0.1);
+            color: #ed8936;
+        }
+
+        .status-danger {
+            background: rgba(255, 87, 87, 0.1);
+            color: #ff5757;
+        }
+
+        /* Task Stats */
+        .task-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .task-stat {
+            text-align: center;
+            padding: 1rem;
+            background: #f7fafc;
+            border-radius: 10px;
+        }
+
+            .task-stat .value {
+                font-size: 1.2rem;
+                font-weight: 600;
+                color: #48bb78;
+            }
+
+            .task-stat .label {
+                color: #718096;
+                font-size: 0.85rem;
+            }
+
+        @@media (max-width: 1024px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @@media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .task-stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="logo">
+            <i class="fas fa-chalkboard-teacher"></i>
+            TeachCodIT
+        </a>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <a href="@Url.Action("Dashboard", "Teacher")" class="back-btn">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <h1 class="page-title">Аналитика курса</h1>
+            <span class="course-badge">@courseTitle</span>
+        </div>
+
+        <!-- Основные метрики -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">@Model.TotalStudents</div>
+                    <div class="stat-label">Всего студентов</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">@Model?.AverageProgress%</div>
+                    <div class="stat-label">Средний прогресс</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">@Model.CompletedStudents</div>
+                    <div class="stat-label">Завершили курс</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">3</div>
+                    <div class="stat-label">На проверке</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Графики -->
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h3 class="chart-title">Распределение прогресса</h3>
+                <div class="chart-container">
+                    <canvas id="progressChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <h3 class="chart-title">Активность по дням</h3>
+                <div class="chart-container">
+                    <canvas id="activityChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        
+
+        <!-- Статистика по заданиям -->
+        <div class="students-table">
+            <h3 class="table-title">📊 Статистика по заданиям</h3>
+
+            <div class="task-stats-grid">
+                <div class="task-stat">
+                    <div class="value">85%</div>
+                    <div class="label">Средняя успеваемость</div>
+                </div>
+                <div class="task-stat">
+                    <div class="value">12</div>
+                    <div class="label">Всего заданий</div>
+                </div>
+                <div class="task-stat">
+                    <div class="value">3</div>
+                    <div class="label">На проверке</div>
+                </div>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Задание</th>
+                        <th>Тип</th>
+                        <th>Выполнили</th>
+                        <th>Средний балл</th>
+                        <th>Дедлайн</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Тест по переменным</td>
+                        <td><span class="status-badge" style="background: rgba(72, 187, 120, 0.1); color: #48bb78;">Тест</span></td>
+                        <td>18/24 (75%)</td>
+                        <td>4.2/5</td>
+                        <td>10.03.2024</td>
+                    </tr>
+                    <tr>
+                        <td>Задача с циклом</td>
+                        <td><span class="status-badge" style="background: rgba(102, 126, 234, 0.1); color: #667eea;">Код</span></td>
+                        <td>12/24 (50%)</td>
+                        <td>3.8/5</td>
+                        <td>15.03.2024</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // График распределения прогресса
+        const ctx1 = document.getElementById('progressChart').getContext('2d');
+        new Chart(ctx1, {
+            type: 'doughnut',
+            data: {
+                labels: ['0-25%', '26-50%', '51-75%', '76-100%', 'Завершили'],
+                datasets: [{
+                    data: [4, 6, 5, 3, 6],
+                    backgroundColor: [
+                        '#ff5757',
+                        '#ed8936',
+                        '#f6ad55',
+                        '#48bb78',
+                        '#38a169'
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+
+        // График активности
+        const ctx2 = document.getElementById('activityChart').getContext('2d');
+        new Chart(ctx2, {
+            type: 'line',
+            data: {
+                labels: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'],
+                datasets: [{
+                    label: 'Активных студентов',
+                    data: [12, 15, 18, 14, 20, 8, 5],
+                    borderColor: '#48bb78',
+                    backgroundColor: 'rgba(72, 187, 120, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
