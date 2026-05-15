@@ -89,13 +89,13 @@ namespace TeachCodIT.Controllers
                 CookieAuthenticationDefaults.AuthenticationScheme,
                 new ClaimsPrincipal(identity));
 
-            if (roleName == "Студент")
+            if (user.RoleId == 3)
                 return RedirectToAction("Home", "Student");
 
-            if (roleName == "Админ")
+            if (user.RoleId == 1)
                 return RedirectToAction("Index", "Admin");
 
-            if (roleName == "Учитель")
+            if (user.RoleId == 2)
                 return RedirectToAction("Dashboard", "Teacher");
 
             return RedirectToAction("Index", "Home");
