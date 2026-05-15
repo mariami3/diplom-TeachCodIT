@@ -25,19 +25,17 @@ builder.Services.AddHttpClient("TeachCodIT-API", client =>
     client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 });
 
-
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
-        options.LoginPath = "/Account/Autorization";
+        options.LoginPath = "/Account/Authorization";
         options.AccessDeniedPath = "/Error/AccessDenied";
         options.LogoutPath = "/Account/Logout";
+
         options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
         options.Cookie.SameSite = SameSiteMode.Lax;
         options.Cookie.HttpOnly = true;
     });
-
-
 // Настройка авторизации с политиками ролей
 builder.Services.AddAuthorization(options =>
 {
