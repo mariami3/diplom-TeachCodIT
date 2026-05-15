@@ -32,10 +32,12 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.AccessDeniedPath = "/Error/AccessDenied";
         options.LogoutPath = "/Account/Logout";
 
-        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.None;
         options.Cookie.SameSite = SameSiteMode.Lax;
         options.Cookie.HttpOnly = true;
     });
+
+
 // Настройка авторизации с политиками ролей
 builder.Services.AddAuthorization(options =>
 {
