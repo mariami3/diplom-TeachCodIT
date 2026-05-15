@@ -31,7 +31,7 @@ namespace TeachCodIT_API.Controllers
             return await _context.Users
                 .Include(u => u.Role)
                 .Include(u => u.UserProfiles)
-                .Include(u => u.UserProgress)
+                //.Include(u => u.UserProgress)
                 .ToListAsync();
         }
 
@@ -42,7 +42,7 @@ namespace TeachCodIT_API.Controllers
             var user = await _context.Users
                 .Include(u => u.Role)
                 .Include(u => u.UserProfiles)
-                .Include(u => u.UserProgress)
+                //.Include(u => u.UserProgress)
                 .FirstOrDefaultAsync(u => u.IdUser == id);
 
             if (user == null)
@@ -58,7 +58,7 @@ namespace TeachCodIT_API.Controllers
             var students = await _context.Users
                 .Include(u => u.Role)
                 .Include(u => u.UserProfiles)
-                .Include(u => u.UserProgress)
+               // .Include(u => u.UserProgress)
                 .Where(u => u.Role.NameRole == "Студент") 
                 .ToListAsync();
 
